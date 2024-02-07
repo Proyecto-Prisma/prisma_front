@@ -115,7 +115,17 @@ const One = () => {
         </Typography>
         <Typography variant="body1" paragraph>
 
-          El programa PRISMA consiste en una plataforma web enfocada en el apoyo a investigadores o personas interesadas en los 
+          El programa PRISMA o su nombre completo Preferred Reporting Items for Systematic Review and Meta-Analysis, 
+          consiste en un algoritmo enfocado en la revisión Sistematica de trabajos, con el objetivo de analizar toda la evidencia
+          relacionada al trabajo, esta fue creada en 2009 por un grupo de expertos en metodología de la investigación y 
+          epidemiología con el objetivo de mejorar la calidad y la transparencia de las revisiones sistemáticas. 
+          
+          Desde entonces, se ha convertido en una referencia ampliamente aceptada en la comunidad científica y 
+          ha sido adoptado por numerosas revistas y organizaciones como estándar para la presentación de revisiones sistemáticas.
+
+
+          
+          Igualmente es el nombre que lleva nuestra plataforma web enfocada en el apoyo a investigadores o personas interesadas en los 
           aspectos academicos como pueden ser experimentación e investigación. 
 
           PRISMA se encarga de analizar y presentar la informacion cargada por el usuario de una forma grafica y simple mediante 
