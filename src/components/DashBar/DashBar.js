@@ -7,7 +7,6 @@ import MuiAppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import List from "@mui/material/List";
 import Typography from "@mui/material/Typography";
-import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
@@ -16,15 +15,19 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import InboxIcon from "@mui/icons-material/MoveToInbox";
-import MailIcon from "@mui/icons-material/Mail";
+import ArticleIcon from '@mui/icons-material/Article'; // Ícono de formulario
+import BarChartIcon from '@mui/icons-material/BarChart'; // Ícono de gráfico
+import HistoryIcon from '@mui/icons-material/History'; // Ícono de historial
 import Avatar from "@mui/material/Avatar";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Home from "../Home/Home";
 import Graphs from "../Graphs/Graps";
+import History from "../History/History";
 
 const drawerWidth = 240;
+const pink = "#FF005B";
+const darkPink = "#C0005E";
 
 const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })(
   ({ theme, open }) => ({
@@ -108,8 +111,8 @@ export default function DashBar() {
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
-      <AppBar position="fixed" open={open}>
-        <Toolbar>
+      <AppBar position="fixed" open={open} sx={{ backgroundColor: pink }}>
+        <Toolbar sx={{ backgroundColor: pink, color: "white" }}>
           <IconButton
             color="inherit"
             aria-label="open drawer"
@@ -119,8 +122,8 @@ export default function DashBar() {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div">
-            Persistent drawer
+          <Typography variant="h6" noWrap component="div" fontWeight={"bold"}>
+            Mi Tablero PRISMA
           </Typography>
           <div style={{ flexGrow: 1 }} />
           <Avatar
@@ -128,6 +131,7 @@ export default function DashBar() {
             src="/path/to/avatar-image.jpg"
             sx={{ cursor: "pointer" }}
             onClick={handleAvatarClick}
+            style={{ backgroundColor: darkPink }}
           />
           <Menu
             anchorEl={anchorEl}
@@ -148,6 +152,7 @@ export default function DashBar() {
           "& .MuiDrawer-paper": {
             width: drawerWidth,
             boxSizing: "border-box",
+            color: pink,
           },
         }}
         variant="persistent"
@@ -157,15 +162,14 @@ export default function DashBar() {
         <DrawerHeader>
           <IconButton onClick={handleDrawerClose}>
             {theme.direction === "ltr" ? (
-              <ChevronLeftIcon />
+              <ChevronLeftIcon sx={{ color: pink }} />
             ) : (
-              <ChevronRightIcon />
+              <ChevronRightIcon sx={{ color: pink }} />
             )}
           </IconButton>
         </DrawerHeader>
-        <Divider />
-        <List>
-          {["PRISMA", "Gráficas", "Historial"].map((text, index) => (
+        <List sx={{ fontWeight: "bold" }}>
+          {["SLR", "Mis Gráficas", "Mi Historial"].map((text, index) => (
             <ListItem
               key={text}
               disablePadding
@@ -173,27 +177,29 @@ export default function DashBar() {
               onClick={() => handleListItemClick(text)}
             >
               <ListItemButton>
-                <ListItemIcon>
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+                <ListItemIcon sx={{ color: pink }}>
+                  {" "}
+                  {/* Asegúrate de usar un valor válido para pink */}
+                  {index % 3 === 0 ? (
+                    <ArticleIcon />
+                  ) : index % 3 === 1 ? (
+                    <BarChartIcon />
+                  ) : (
+                    <HistoryIcon />
+                  )}
                 </ListItemIcon>
-                <ListItemText primary={text} />
+                <ListItemText primary={text}/>
               </ListItemButton>
             </ListItem>
           ))}
         </List>
-        <Divider />
       </Drawer>
       <Main open={open}>
         <DrawerHeader />
-        {selectedItem === "PRISMA" && (
-          <Home />
-        )}
-        {selectedItem === "Gráficas" && (
-          <Graphs />
-        )}
-        {selectedItem === "Historial" && (
-          
-          <Typography paragraph>Content for Historial selected.</Typography>
+        {selectedItem === "SLR" && <Home />}
+        {selectedItem === "Mis Gráficas" && <Graphs />}
+        {selectedItem === "Mi Historial" && (
+          <History />
         )}
       </Main>
     </Box>
