@@ -10,7 +10,6 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { dark } from "@mui/material/styles/createPalette";
 
 function Copyright(props) {
   return (
@@ -35,8 +34,6 @@ function Copyright(props) {
 const defaultTheme = createTheme();
 const pink = "#FF005B";
 const darkPink = "#C0005E";
-const orange = "#FF3D3E";
-const yellow = "#FFB900";
 
 export default function Login() {
   const handleSubmit = (event) => {

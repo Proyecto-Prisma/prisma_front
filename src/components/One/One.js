@@ -13,6 +13,8 @@ import {
   CardContent,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import b1 from '../../assets/images/busq1.png'; // Adjust the path as necessary
+import b2 from '../../assets/images/busq2.png'; // Adjust the path as necessary
 
 const One = () => {
   const pink = "#FF005B";
@@ -208,13 +210,13 @@ const One = () => {
             En estas imagenes se presentan algunos ejemplos de busquedas mencionados en los videos y textos previos. 
           </Typography>
           <img
-            src="assets/images/busq1.png"
+            src={b1}
             alt="Ejemplo 1 de busqueda"
             style={{ maxWidth: "50%", margin: "1rem 2rem" }}
           />
 
           <img
-            src="assets/images/busq2.png"
+            src={b2}
             alt="Ejemplo 2 de busqueda"
             style={{ maxWidth: "50%", margin: "1rem 2rem" }}
           />

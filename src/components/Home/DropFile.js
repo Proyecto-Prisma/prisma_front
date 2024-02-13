@@ -4,7 +4,9 @@ import PropTypes from "prop-types";
 import "./drop-file-input.css";
 
 import { ImageConfig } from "../../components/Home/ImageConfig";
-import uploadImg from "/Users/salomon/Documents/Projects/prisma_app/src/assets/input-file/upload.png";
+import uploadImg from '../../assets/input-file/upload.png';
+
+
 
 const DropFile = (props) => {
   const wrapperRef = useRef(null);
