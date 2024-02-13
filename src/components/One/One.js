@@ -110,12 +110,48 @@ const One = () => {
       </AppBar>
 
       <Box sx={{ margin: "3rem 5rem" }}>
+      <Typography variant="h2" gutterBottom>
+          ¿Que es PRISMA?
+        </Typography>
+        <Typography variant="body1" paragraph>
+
+          El programa PRISMA o su nombre completo Preferred Reporting Items for Systematic Review and Meta-Analysis, 
+          consiste en un algoritmo enfocado en la revisión Sistematica de trabajos, con el objetivo de analizar toda la evidencia
+          relacionada al trabajo, esta fue creada en 2009 por un grupo de expertos en metodología de la investigación y 
+          epidemiología con el objetivo de mejorar la calidad y la transparencia de las revisiones sistemáticas. 
+          
+          Desde entonces, se ha convertido en una referencia ampliamente aceptada en la comunidad científica y 
+          ha sido adoptado por numerosas revistas y organizaciones como estándar para la presentación de revisiones sistemáticas.
+
+
+          
+          Igualmente es el nombre que lleva nuestra plataforma web enfocada en el apoyo a investigadores o personas interesadas en los 
+          aspectos academicos como pueden ser experimentación e investigación. 
+
+          PRISMA se encarga de analizar y presentar la informacion cargada por el usuario de una forma grafica y simple mediante 
+          procesos como pueden ser el SLR o Revisión Sistematica de Literatura y la normalización para procesar y graficar los datos.
+
+          Este acepta resultados de busqueda de varias bases de datos como puede ser World of Science, Scopus, IEEExplore, entre otros.
+          El formato de estos resultados pueden ser de varios tipos, como lo puede ser valores separados por comas o archivos de texto.
+
+     
+         
+        </Typography>
+
         <Typography variant="h2" gutterBottom>
           Método SLR: Revisión Sistemática de Literatura
         </Typography>
         <Typography variant="body1" paragraph>
-          El método SLR es una técnica esencial para validar documentos
-          académicos...
+        El método SLR es una técnica esencial para validar documentos académicos. SLR, o Revisión Sistemática de la Literatura, 
+        es un tipo de revisión de la literatura que recopila y analiza críticamente múltiples estudios o trabajos de investigación 
+        a través de un proceso sistemático.
+
+        Este método se utiliza para identificar, evaluar e interpretar el trabajo de investigadores, académicos y profesionales 
+        en un campo elegido.
+
+        Este metodo es usado como base para los procesos de la aplicación PRISMA, antes de dar los resultados para los investigadores que hacen
+        uso de nuestra plataforma.
+
         </Typography>
 
         <Accordion>
@@ -124,7 +160,15 @@ const One = () => {
           </AccordionSummary>
           <AccordionDetails>
             <Typography>
-              Aquí se explican los pasos detallados para realizar búsquedas...
+              Aquí se explican los pasos detallados para realizar búsquedas, toma en nota que algunas bases de datos piden alguna
+              membresia o cuenta academica para acceder o descargar los datos.
+
+              1. Entra a la pagina web de la base de datos que deseas consultar
+              2. Busca la sección de busqueda e ingresa los conceptos que deseas consultar
+              3.Tras la busqueda, busca el botón de descarga
+              4. Descarga todos los apartados y en formato .csv, si posible.
+
+              {/* {Aqui se debe insertar el video terminado de la explicacion de las busquedas y como descargarlas.} */}
             </Typography>
           </AccordionDetails>
         </Accordion>
@@ -160,7 +204,20 @@ const One = () => {
 
         <Box my={4}>
           <Typography variant="h5">Ejemplos de Búsquedas</Typography>
-          {/* Inserta aquí imágenes o capturas de pantalla */}
+          <Typography variant="body1" paragraph>
+            En estas imagenes se presentan algunos ejemplos de busquedas mencionados en los videos y textos previos. 
+          </Typography>
+          <img
+            src="assets/images/busq1.png"
+            alt="Ejemplo 1 de busqueda"
+            style={{ maxWidth: "50%", margin: "1rem 2rem" }}
+          />
+
+          <img
+            src="assets/images/busq2.png"
+            alt="Ejemplo 2 de busqueda"
+            style={{ maxWidth: "50%", margin: "1rem 2rem" }}
+          />
         </Box>
       </Box>
     </>
