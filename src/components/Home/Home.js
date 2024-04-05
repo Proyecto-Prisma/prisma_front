@@ -8,12 +8,34 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
 import DropFile from "./DropFile";
 import Button from "@mui/material/Button";
+import axios from 'axios';
 
 const Home = () => {
   const pink = "#FF005B";
   const darkPink = "#C0005E";
   const [showScopus, setShowScopus] = useState(true);
   const [showWos, setShowWos] = useState(true);
+
+  const handleExportData = () => {
+    axios({
+      url: "http://localhost:5000/export",
+      method: "GET",
+      responseType: "blob", // Important
+    })
+      .then((response) => {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", "processed_data.xlsx"); // or any other filename
+        document.body.appendChild(link);
+        link.click();
+        link.parentNode.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  };
 
   return (
     <Box mt={4}>
@@ -62,8 +84,7 @@ const Home = () => {
               <Switch
                 checked={showScopus}
                 onChange={() => setShowScopus(!showScopus)}
-                sx={{ color: pink}}
-
+                sx={{ color: pink }}
               />
             }
             label="Mostrar ARCHIVO SCOPUS"
@@ -91,7 +112,8 @@ const Home = () => {
               </Typography>
               <div style={{ marginLeft: "8rem" }}>
                 <DropFile
-                  onFileChange={(files) => console.log("Form 1 files:", files)}
+                  onFileChange={(files) => console.log("Scopus files:", files)}
+                  source="scopus_file" // Here we pass the source prop as "scopus_file"
                 />
               </div>
             </Paper>
@@ -108,7 +130,8 @@ const Home = () => {
               </Typography>
               <div style={{ marginLeft: "8rem" }}>
                 <DropFile
-                  onFileChange={(files) => console.log("Form 2 files:", files)}
+                  onFileChange={(files) => console.log("WoS files:", files)}
+                  source="wos_file" // Here we pass the source prop as "wos_file"
                 />
               </div>
             </Paper>
@@ -120,6 +143,7 @@ const Home = () => {
         <Button
           variant="contained"
           size="large"
+          onClick={handleExportData}
           sx={{
             backgroundColor: pink,
             fontWeight: "bold",
