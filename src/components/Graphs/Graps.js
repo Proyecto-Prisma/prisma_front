@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Button, Grid, Paper, Typography } from '@mui/material';
-import { BarChart, Bar, PieChart, Pie, RadarChart, PolarGrid, PolarAngleAxis, Radar, ScatterChart, Scatter, XAxis, YAxis, Tooltip, Legend, LineChart, Line } from 'recharts';
+import { BarChart, Bar, PieChart, Pie, RadarChart, PolarGrid, PolarAngleAxis, Radar, XAxis, YAxis, Tooltip, Legend, LineChart, Line } from 'recharts';
 import axios from 'axios';
 
 const Graphs = () => {
-  const [chartData, setChartData] = useState(null);
+  const [chartData, setChartData] = useState({
+    keywords: [],
+    countries: [],
+    citedTimes: [],
+    top5CitedTimes: []
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -13,10 +18,14 @@ const Graphs = () => {
         const responseCountries = await axios.get('http://127.0.0.1:5000/data/visualize/countries');
         const responseCitedTimes = await axios.get('http://127.0.0.1:5000/data/visualize/cited_times');
 
+        const citedTimesData = responseCitedTimes.data.chart_data.filter(item => item.cited_times !== "No data");
+        console.log('Cited Times Data:', citedTimesData);
+
         setChartData({
           keywords: responseKeywords.data.chart_data,
           countries: responseCountries.data.chart_data,
-          citedTimes: responseCitedTimes.data.chart_data
+          citedTimes: citedTimesData,
+
         });
       } catch (error) {
         console.error('Error fetching chart data:', error);
@@ -25,48 +34,6 @@ const Graphs = () => {
 
     fetchData();
   }, []);
-
-  const renderChart = (data, type) => {
-    if (!data) return null;
-
-    if (data.length === 0) {
-      return <Typography variant="body1">No data available</Typography>;
-    }
-
-    // Render different types of charts based on the type of data
-    switch (type) {
-      case 'keywords':
-        return (
-          <BarChart width={400} height={300} data={data}>
-            <Bar dataKey="frequency" fill="#8884d8" />
-            <XAxis dataKey="keyword" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-          </BarChart>
-        );
-      case 'countries':
-        return (
-          <PieChart width={400} height={300}>
-            <Pie data={data} dataKey="frequency" nameKey="country" cx="50%" cy="50%" outerRadius={80} fill="#8884d8" label />
-            <Tooltip />
-            <Legend />
-          </PieChart>
-        );
-      case 'citedTimes':
-        return (
-          <BarChart width={800} height={500} data={data}>
-            <Bar dataKey="Times Cited" fill="#8884d8" />
-            <XAxis dataKey="Article Title" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-          </BarChart>
-        );
-      default:
-        return null;
-    }
-  };
 
   return (
     <Box mt={4}>
@@ -96,30 +63,94 @@ const Graphs = () => {
       </Grid>
 
       <Grid container spacing={3}>
-        <Grid item xs={12}>
+        <Grid item xs={12} md={4}>
           <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }}>
             <Typography variant="h6" gutterBottom>
               Histogram
             </Typography>
-            {renderChart(chartData?.keywords, 'keywords')}
+            <BarChart width={400} height={300} data={chartData.keywords}>
+              <Bar dataKey="frequency" fill="#66BB6A" />
+              <XAxis dataKey="keyword" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+            </BarChart>
           </Paper>
         </Grid>
 
-        <Grid item xs={12}>
+        <Grid item xs={12} md={4}>
           <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }}>
             <Typography variant="h6" gutterBottom>
               Pie Chart
             </Typography>
-            {renderChart(chartData?.countries, 'countries')}
+            <PieChart width={400} height={300}>
+              <Pie
+                data={chartData.countries}
+                dataKey="frequency"
+                nameKey="country"
+                cx="50%"
+                cy="50%"
+                outerRadius={80}
+                fill="#42A5F5"
+                label
+              />
+              <Tooltip />
+              <Legend />
+            </PieChart>
           </Paper>
         </Grid>
 
-        <Grid item xs={12}>
+        <Grid item xs={12} md={4}>
+          <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }}>
+            <Typography variant="h6" gutterBottom>
+              Radar Chart
+            </Typography>
+            <RadarChart
+              outerRadius={90}
+              width={400}
+              height={300}
+              data={chartData.keywords}
+            >
+              <PolarGrid />
+              <PolarAngleAxis dataKey="keyword" />
+              <Radar
+                dataKey="frequency"
+                stroke="#F06292"
+                fill="#F06292"
+                fillOpacity={0.6}
+              />
+              <Tooltip />
+            </RadarChart>
+          </Paper>
+        </Grid>
+
+        <Grid item xs={12} md={8} >
+          <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }}>
+            <Typography variant="h6" gutterBottom>
+              Line Chart
+            </Typography>
+            <LineChart width={800} height={300} data={chartData.keywords}>
+              <XAxis dataKey="keyword" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Line type="monotone" dataKey="frequency" stroke="#FF7043" />
+            </LineChart>
+          </Paper>
+        </Grid>
+
+        <Grid item xs={12} md={8}>
           <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }}>
             <Typography variant="h6" gutterBottom>
               Cited Times Chart
             </Typography>
-            {renderChart(chartData?.citedTimes, 'citedTimes')}
+            <BarChart width={800} height={300} data={chartData.citedTimes}>
+              <Bar dataKey="cited_times" fill="#BA68C8" />
+              <XAxis dataKey="title" />
+              <YAxis />
+              <Tooltip cursor={{ fill: 'transparent' }} />
+              <Legend />
+            </BarChart>
           </Paper>
         </Grid>
       </Grid>
