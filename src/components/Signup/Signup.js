@@ -1,4 +1,7 @@
-import * as React from "react";
+import React, { useState } from "react";
+import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
@@ -8,6 +11,33 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+
+// Crear un tema personalizado
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#FF005B", // Color rosa personalizado
+    },
+  },
+  components: {
+    // Personalización global para todos los MuiTextField
+    MuiTextField: {
+      defaultProps: {
+        // Aplicar el color de enfoque al color primario del tema
+        InputLabelProps: {
+          color: "primary",
+        },
+        InputProps: {
+          sx: {
+            "&.Mui-focused fieldset": {
+              borderColor: "#FF005B", // Cambiar el color del borde al enfocarse
+            },
+          },
+        },
+      },
+    },
+  },
+});
 
 function Copyright(props) {
   return (
@@ -19,7 +49,7 @@ function Copyright(props) {
     >
       {"Copyright © "}
       <Link color="inherit" href="https://tec.mx/es">
-        Tec de Monterrey
+        Tecnológico de Monterrey
       </Link>{" "}
       {new Date().getFullYear()}
       {"."}
@@ -27,24 +57,36 @@ function Copyright(props) {
   );
 }
 
-// TODO remove, this demo shouldn't need to reset the theme.
-
-const defaultTheme = createTheme();
-const pink = "#FF005B";
-const darkPink = "#C0005E";
-
 export default function SignUp() {
-  const handleSubmit = (event) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const pink = "#FF005B";
+  const darkPink = "#C0005E";
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get("email"),
-      password: data.get("password"),
-    });
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match!");
+      return;
+    }
+
+    try {
+      await axios.post("http://127.0.0.1:5000/auth/signup", {
+        email,
+        password,
+      });
+      toast.success("Registration successful! Please login.");
+      // Redirect to login page or other action
+    } catch (error) {
+      toast.error(
+        error.response?.data?.error || "An error occurred during signup."
+      );
+    }
   };
 
   return (
-    <ThemeProvider theme={defaultTheme}>
+    <ThemeProvider theme={theme}>
       <Container component="main" maxWidth="xs">
         <CssBaseline />
         <Box
@@ -67,32 +109,11 @@ export default function SignUp() {
           </Typography>
           <Box
             component="form"
-            noValidate
             onSubmit={handleSubmit}
+            noValidate
             sx={{ mt: 3 }}
           >
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  autoComplete="given-name"
-                  name="firstName"
-                  required
-                  fullWidth
-                  id="firstName"
-                  label="Nombre"
-                  autoFocus
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  required
-                  fullWidth
-                  id="lastName"
-                  label="Apellido"
-                  name="lastName"
-                  autoComplete="family-name"
-                />
-              </Grid>
               <Grid item xs={12}>
                 <TextField
                   required
@@ -101,6 +122,8 @@ export default function SignUp() {
                   label="Correo institucional"
                   name="email"
                   autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -112,6 +135,20 @@ export default function SignUp() {
                   type="password"
                   id="password"
                   autoComplete="new-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  required
+                  fullWidth
+                  name="confirmPassword"
+                  label="Confirmar contraseña"
+                  type="password"
+                  id="confirmPassword"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                 />
               </Grid>
             </Grid>
@@ -132,14 +169,15 @@ export default function SignUp() {
             </Button>
             <Grid container justifyContent="flex-end">
               <Grid item>
-                <Link href="/login" variant="body2" color={darkPink}>
-                  Ya tienes cuenta? Inicia sesión
+                <Link href="/login" variant="body2">
+                  ¿Ya tienes cuenta? Inicia sesión
                 </Link>
               </Grid>
             </Grid>
           </Box>
         </Box>
-        <Copyright sx={{ mt: 5 }} />
+        <Copyright sx={{ mt: 8, mb: 4 }} />
+        <ToastContainer position="top-center" />
       </Container>
     </ThemeProvider>
   );
