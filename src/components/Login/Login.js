@@ -76,7 +76,7 @@ export default function Login() {
     };
     try {
       const response = await axios.post(
-        "http://82.165.212.88:8000/auth/login",
+        "http://82.165.212.88/auth/login",
         { email, password },
         config
       );
