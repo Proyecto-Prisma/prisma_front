@@ -1,4 +1,7 @@
-import * as React from "react";
+import React, { useState } from "react";
+import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
@@ -10,7 +13,34 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { useNavigate } from "react-router-dom"; // Updated import
 
+// Crear un tema personalizado
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#FF005B", // Color rosa personalizado
+    },
+  },
+  components: {
+    // Personalización global para todos los MuiTextField
+    MuiTextField: {
+      defaultProps: {
+        // Aplicar el color de enfoque al color primario del tema
+        InputLabelProps: {
+          color: "primary",
+        },
+        InputProps: {
+          sx: {
+            "&.Mui-focused fieldset": {
+              borderColor: "#FF005B", // Cambiar el color del borde al enfocarse
+            },
+          },
+        },
+      },
+    },
+  },
+});
 function Copyright(props) {
   return (
     <Typography
@@ -21,32 +51,39 @@ function Copyright(props) {
     >
       {"Copyright © "}
       <Link color="inherit" href="https://tec.mx/es">
-        Tec de Monterrey
+        Tecnológico de Monterrey
       </Link>{" "}
       {new Date().getFullYear()}
       {"."}
     </Typography>
   );
 }
-
-// TODO remove, this demo shouldn't need to reset the theme.
-
-const defaultTheme = createTheme();
 const pink = "#FF005B";
 const darkPink = "#C0005E";
 
 export default function Login() {
-  const handleSubmit = (event) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate(); // Updated to useNavigate
+  // const { setAuthData } = useContext(AuthContext); // If using context for auth state
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get("email"),
-      password: data.get("password"),
-    });
+    try {
+      const response = await axios.post("http://127.0.0.1:5000/auth/login", {
+        email,
+        password,
+      });
+      toast.success(response.data.message);
+      // Navigate to dashboard or another page upon successful login
+      navigate("/prisma"); // Update this path as needed
+    } catch (error) {
+      toast.error(error.response?.data?.error || "An error occurred.");
+    }
   };
 
   return (
-    <ThemeProvider theme={defaultTheme}>
+    <ThemeProvider theme={theme}>
       <Container component="main" maxWidth="xs">
         <CssBaseline />
         <Box
@@ -64,7 +101,6 @@ export default function Login() {
               style={{ maxWidth: "50%" }}
             />
           </div>
-
           <Typography component="h1" variant="h5">
             Bienvenido, inicia sesión
           </Typography>
@@ -83,6 +119,8 @@ export default function Login() {
               name="email"
               autoComplete="email"
               autoFocus
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
             <TextField
               margin="normal"
@@ -93,6 +131,8 @@ export default function Login() {
               type="password"
               id="password"
               autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
             <FormControlLabel
               control={<Checkbox value="remember" color="primary" />}
@@ -105,9 +145,9 @@ export default function Login() {
               sx={{
                 mt: 3,
                 mb: 2,
-                backgroundColor: pink, // Change to the desired color
+                backgroundColor: pink,
                 "&:hover": {
-                  backgroundColor: darkPink, // Change to the desired hover color
+                  backgroundColor: darkPink,
                 },
               }}
             >
@@ -115,19 +155,20 @@ export default function Login() {
             </Button>
             <Grid container>
               <Grid item xs>
-                <Link href="#" variant="body2" color={darkPink}>
-                  Olvidaste tu contraseña?
+                <Link href="#" variant="body2" sx={{ color: darkPink }}>
+                  ¿Olvidaste tu contraseña?
                 </Link>
               </Grid>
               <Grid item>
-                <Link href="/signup" variant="body2" color={darkPink}>
-                  {"No tienes cuenta? Regístrate"}
+                <Link href="/signup" variant="body2" sx={{ color: darkPink }}>
+                  {"¿No tienes cuenta? Regístrate"}
                 </Link>
               </Grid>
             </Grid>
           </Box>
         </Box>
         <Copyright sx={{ mt: 8, mb: 4 }} />
+        <ToastContainer position="top-center" />
       </Container>
     </ThemeProvider>
   );

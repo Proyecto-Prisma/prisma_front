@@ -15,9 +15,9 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import ArticleIcon from '@mui/icons-material/Article'; // Ícono de formulario
-import BarChartIcon from '@mui/icons-material/BarChart'; // Ícono de gráfico
-import HistoryIcon from '@mui/icons-material/History'; // Ícono de historial
+import ArticleIcon from "@mui/icons-material/Article"; // Ícono de formulario
+import BarChartIcon from "@mui/icons-material/BarChart"; // Ícono de gráfico
+import HistoryIcon from "@mui/icons-material/History"; // Ícono de historial
 import Avatar from "@mui/material/Avatar";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
@@ -77,7 +77,7 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 export default function DashBar() {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
-  const [selectedItem, setSelectedItem] = React.useState("PRISMA");
+  const [selectedItem, setSelectedItem] = React.useState("SLR");
   const [anchorEl, setAnchorEl] = React.useState(null);
 
   const handleDrawerOpen = () => {
@@ -188,7 +188,7 @@ export default function DashBar() {
                     <HistoryIcon />
                   )}
                 </ListItemIcon>
-                <ListItemText primary={text}/>
+                <ListItemText primary={text} />
               </ListItemButton>
             </ListItem>
           ))}
@@ -198,9 +198,7 @@ export default function DashBar() {
         <DrawerHeader />
         {selectedItem === "SLR" && <Home />}
         {selectedItem === "Mis Gráficas" && <Graphs />}
-        {selectedItem === "Mi Historial" && (
-          <History />
-        )}
+        {selectedItem === "Mi Historial" && <History />}
       </Main>
     </Box>
   );

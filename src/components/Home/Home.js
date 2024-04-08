@@ -1,163 +1,87 @@
-import React, { useState } from "react";
+import React from "react";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Switch from "@mui/material/Switch";
-import DropFile from "./DropFile";
-import Button from "@mui/material/Button";
-import axios from 'axios';
+import FileUpload from "../FileUpload/FileUpload";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+
+// Crear un tema personalizado
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#FF005B", // Color rosa personalizado
+    },
+  },
+  components: {
+    // Personalización global para todos los MuiTextField
+    MuiTextField: {
+      defaultProps: {
+        // Aplicar el color de enfoque al color primario del tema
+        InputLabelProps: {
+          color: "primary",
+        },
+        InputProps: {
+          sx: {
+            "&.Mui-focused fieldset": {
+              borderColor: "#FF005B", // Cambiar el color del borde al enfocarse
+            },
+          },
+        },
+      },
+    },
+  },
+});
 
 const Home = () => {
-  const pink = "#FF005B";
-  const darkPink = "#C0005E";
-  const [showScopus, setShowScopus] = useState(true);
-  const [showWos, setShowWos] = useState(true);
-
-  const handleExportData = () => {
-    axios({
-      url: "http://localhost:5000/export",
-      method: "GET",
-      responseType: "blob", // Important
-    })
-      .then((response) => {
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", "processed_data.xlsx"); // or any other filename
-        document.body.appendChild(link);
-        link.click();
-        link.parentNode.removeChild(link);
-        window.URL.revokeObjectURL(url);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
-  };
-
   return (
-    <Box mt={4}>
-      <Typography variant="h4" gutterBottom>
-        Herramienta SLR
-      </Typography>
-      <Typography variant="body1" paragraph sx={{ paddingBottom: "3rem" }}>
-        Welcome to the file upload page! Please select your files using the
-        forms below.
-      </Typography>
+    <ThemeProvider theme={theme}>
+      <Box mt={4}>
+        <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold", fontSize: "50px" }}>
+          Herramienta SLR
+        </Typography>
+        <Typography variant="body1" paragraph sx={{ paddingBottom: "3rem", fontSize: "20px", color: "gray" }}>
+          ¡Bienvenido a la página de carga de archivos! Aquí puedes subir tus
+          documentos para comenzar tu revisión sistemática de literatura.
+          Simplemente selecciona tus archivos utilizando los formularios a
+          continuación. Establece tu cadena de búsqueda y los años de inicio y
+          fin para afinar tu investigación. Comencemos.
+        </Typography>
 
-      {/* New Inputs for Indice de búsqueda and Year */}
-      <Grid container spacing={3} sx={{ marginBottom: "2rem" }}>
-        <Grid item xs={12} md={6}>
-          <TextField
-            fullWidth
-            label="Cadena de búsqueda"
-            placeholder="Cadena de busqueda"
-            variant="outlined"
-          />
-        </Grid>
-        <Grid item xs={12} md={3}>
-          <TextField
-            fullWidth
-            type="number"
-            label="Año de Inicio"
-            placeholder="YYYY"
-            variant="outlined"
-          />
-        </Grid>
-        <Grid item xs={12} md={3}>
-          <TextField
-            fullWidth
-            type="number"
-            label="Año de Fin"
-            placeholder="YYYY"
-            variant="outlined"
-          />
-        </Grid>
-      </Grid>
-
-      <Grid container spacing={3} alignItems="center" justifyContent="center">
-        <Grid item>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={showScopus}
-                onChange={() => setShowScopus(!showScopus)}
-                sx={{ color: pink }}
-              />
-            }
-            label="Mostrar ARCHIVO SCOPUS"
-          />
-        </Grid>
-        <Grid item>
-          <FormControlLabel
-            control={
-              <Switch checked={showWos} onChange={() => setShowWos(!showWos)} />
-            }
-            label="Mostrar ARCHIVO WOS"
-          />
-        </Grid>
-      </Grid>
-
-      <Grid container spacing={3}>
-        {showScopus && (
+        <Grid container spacing={3} sx={{ marginBottom: "2rem" }}>
           <Grid item xs={12} md={6}>
-            <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }}>
-              <Typography variant="h6" gutterBottom>
-                ARCHIVO SCOPUS
-              </Typography>
-              <Typography variant="body2" color="textSecondary" paragraph>
-                Ingrese su archivo SCOPUS en formato .xlsx
-              </Typography>
-              <div style={{ marginLeft: "8rem" }}>
-                <DropFile
-                  onFileChange={(files) => console.log("Scopus files:", files)}
-                  source="scopus_file" // Here we pass the source prop as "scopus_file"
-                />
-              </div>
-            </Paper>
+            <TextField
+              fullWidth
+              label="Cadena de búsqueda"
+              placeholder="Cadena de búsqueda"
+              variant="outlined"
+            />
           </Grid>
-        )}
-        {showWos && (
-          <Grid item xs={12} md={6}>
-            <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }}>
-              <Typography variant="h6" gutterBottom>
-                ARCHIVO WOS
-              </Typography>
-              <Typography variant="body2" color="textSecondary" paragraph>
-                Ingrese su archivo WOS en formato .csv
-              </Typography>
-              <div style={{ marginLeft: "8rem" }}>
-                <DropFile
-                  onFileChange={(files) => console.log("WoS files:", files)}
-                  source="wos_file" // Here we pass the source prop as "wos_file"
-                />
-              </div>
-            </Paper>
+          <Grid item xs={12} md={3}>
+            <TextField
+              fullWidth
+              type="number"
+              label="Año de Inicio"
+              placeholder="YYYY"
+              variant="outlined"
+            />
           </Grid>
-        )}
-      </Grid>
+          <Grid item xs={12} md={3}>
+            <TextField
+              fullWidth
+              type="number"
+              label="Año de Fin"
+              placeholder="YYYY"
+              variant="outlined"
+            />
+          </Grid>
+        </Grid>
 
-      <div style={{ marginTop: "2rem", textAlign: "center" }}>
-        <Button
-          variant="contained"
-          size="large"
-          onClick={handleExportData}
-          sx={{
-            backgroundColor: pink,
-            fontWeight: "bold",
-            textTransform: "none",
-            padding: "0.5rem 4rem",
-            ":hover": {
-              backgroundColor: darkPink,
-            },
-          }}
-        >
-          Ejecutar SLR
-        </Button>
-      </div>
-    </Box>
+        <Box>
+          <FileUpload />
+        </Box>
+      </Box>
+    </ThemeProvider>
   );
 };
 

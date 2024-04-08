@@ -2,7 +2,6 @@ import React, { useRef, useState } from "react";
 import PropTypes from "prop-types";
 import "./drop-file-input.css";
 import uploadImg from "../../assets/input-file/upload.png";
-import axios from 'axios';
 
 const DropFile = ({ onFileChange, source }) => {
   const wrapperRef = useRef(null);
@@ -15,27 +14,16 @@ const DropFile = ({ onFileChange, source }) => {
   const onFileDrop = (e) => {
     const newFiles = e.target.files;
     if (newFiles.length) {
-      const updatedList = [...fileList, ...newFiles];
+      const updatedList = [...fileList, newFiles[0]];
       setFileList(updatedList);
-      onFileChange(updatedList);
-  
-      const formData = new FormData();
-      formData.append(source, newFiles[0], newFiles[0].name);
-  
-      axios.post("http://localhost:5000/upload", formData)
-        .then((response) => {
-          console.log("Success:", response.data);
-        })
-        .catch((error) => {
-          console.error("Error:", error);
-        });
+      onFileChange({ files: updatedList, source }); // Pass the file and source back to the parent
     }
   };
 
   const fileRemove = (file) => {
     const updatedList = fileList.filter((item) => item !== file);
     setFileList(updatedList);
-    onFileChange(updatedList);
+    onFileChange({ files: updatedList, source });
   };
 
   return (
@@ -54,7 +42,7 @@ const DropFile = ({ onFileChange, source }) => {
         <input
           type="file"
           onChange={onFileDrop}
-          multiple={false} // Set to true if you want to accept multiple files
+          multiple={false}
           style={{ width: "400px" }}
         />
       </div>
