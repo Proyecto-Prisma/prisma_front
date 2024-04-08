@@ -4,6 +4,10 @@ import { BarChart, Bar, PieChart, Pie, RadarChart, PolarGrid, PolarAngleAxis, Ra
 import axios from 'axios';
 import {Cell } from 'recharts'; // Importamos las componentes necesarias
 import ReactWordcloud from 'react-wordcloud'; // Importamos ReactWordcloud
+import { ComposableMap, Geographies, Geography } from 'react-simple-maps'; // Importamos los componentes de react-simple-maps
+import customGeoJSON from './custom.geo.json';
+import {TableContainer, Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material'; // Asegúrate de importar los componentes necesarios de Material-UI
+
 
 const Graphs = () => {
   const [chartData, setChartData] = useState({
@@ -45,6 +49,22 @@ const Graphs = () => {
 
   const generateRandomColor = () => {
     return '#' + Math.floor(Math.random()*16777215).toString(16);
+  };
+
+  const getColorFromFrequency = (frequency) => {
+    // Aquí puedes definir tu lógica para asignar colores basados en la frecuencia
+    // Por ejemplo, puedes asignar un rango de colores basado en la frecuencia
+    // Cuanto mayor sea la frecuencia, más oscuro será el color, etc.
+    // Por simplicidad, aquí utilizaremos un gradiente de azul a rojo basado en la frecuencia
+    const maxFrequency = 100; // Este es solo un valor de ejemplo, puedes ajustarlo según tus datos
+    const minColor = [0, 0, 255]; // Azul
+    const maxColor = [255, 0, 0]; // Rojo
+    
+    // Calculamos el color interpolando entre minColor y maxColor según la frecuencia
+    const color = maxColor.map((max, i) => Math.round((max - minColor[i]) * (frequency / maxFrequency) + minColor[i]));
+  
+    // Convertimos el color a formato hexadecimal
+    return `rgb(${color.join(',')})`;
   };
 
   const options = {
@@ -238,6 +258,108 @@ const Graphs = () => {
             </Paper>
           </Grid>
         </Grid>
+
+        
+        <Grid container spacing={3}>
+  <Grid item xs={12} md={6}>
+    <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }}>
+      <Typography variant="h6" gutterBottom>
+        Países
+      </Typography>
+      <ComposableMap
+        projection="geoMercator"
+        projectionConfig={{ scale: 120 }}
+        width={800}
+        height={500}
+      >
+        <Geographies geography={customGeoJSON}>
+          {({ geographies }) =>
+            geographies.map((geo) => {
+              const countryName = geo.properties && geo.properties.name ? geo.properties.name.trim().toUpperCase() : null;
+              const listNames = chartData.countries.map((data) => data.country.toUpperCase());
+
+              console.log('Country Name:', countryName);
+              console.log('List Names:', listNames);
+
+              // Verificar si el nombre del país está en la lista de nombres
+              const isInList = listNames.includes(countryName);
+
+              // Si el país está en la lista, colorearlo, de lo contrario, dejarlo gris
+              const fillColor = isInList ? getColorFromFrequency(chartData.countries.find((data) => data.country.toUpperCase() === countryName).frequency) : '#cccccc';
+
+              // Obtener el valor de la frecuencia para la etiqueta
+              const frequencyLabel = chartData.countries.find((data) => data.country.toUpperCase() === countryName)?.frequency;
+
+              return (
+                <React.Fragment key={geo.rsmKey}>
+                  <Geography
+                    geography={geo}
+                    fill={fillColor}
+                    style={{
+                      hover: {
+                        fill: '#F53',
+                        outline: 'none',
+                      },
+                    }}
+                  />
+                  {frequencyLabel && geo.centroid && (
+                    <text
+                      x={geo.centroid[0]}
+                      y={geo.centroid[1]}
+                      style={{
+                        fontFamily: 'Arial, sans-serif',
+                        fontSize: '10px',
+                        fill: '#000',
+                        pointerEvents: 'none',
+                        userSelect: 'none',
+                      }}
+                      textAnchor="middle"
+                    >
+                      {frequencyLabel}
+                    </text>
+                  )}
+                </React.Fragment>
+              );
+            })
+          }
+        </Geographies>
+      </ComposableMap>
+    </Paper>
+  </Grid>
+
+  {/* Datos de frecuencia de países */}
+  <Grid item xs={12} md={6}>
+    <Paper elevation={3} style={{ padding: 16, borderRadius: '1rem' }}>
+      <Typography variant="h6" gutterBottom>
+        Frecuencia de Países
+      </Typography>
+      <TableContainer>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>País</TableCell>
+              <TableCell align="right">Frecuencia</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {chartData.countries.map((countryData, index) => (
+              <TableRow key={index}>
+                <TableCell>{countryData.country}</TableCell>
+                <TableCell align="right">
+                  <span style={{ fontWeight: 'bold', color: countryData.frequency > 50 ? 'red' : 'inherit' }}>
+                    {countryData.frequency}
+                  </span>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Paper>
+  </Grid>
+</Grid>
+
+
 
 
       </Grid>
