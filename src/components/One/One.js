@@ -129,40 +129,44 @@ const One = () => {
             style={{ maxWidth: "4%", margin: "1rem 2rem" }}
           />
           <Box style={{ flexGrow: 1 }}></Box>
-          <Button
-            sx={{
-              backgroundColor: pink,
-              fontWeight: "bold",
-              textTransform: "none",
-              color: "white",
-              marginRight: "2rem",
-              padding: "0.5rem 2rem",
-              borderRadius: "1rem",
+          <a href="/signup">
+            <Button
+              sx={{
+                backgroundColor: pink,
+                fontWeight: "bold",
+                textTransform: "none",
+                color: "white",
+                marginRight: "2rem",
+                padding: "0.5rem 2rem",
+                borderRadius: "1rem",
 
-              ":hover": {
-                backgroundColor: darkPink,
-              },
-            }}
-          >
-            Registro
-          </Button>
-          <Button
-            sx={{
-              backgroundColor: pink,
-              fontWeight: "bold",
-              textTransform: "none",
-              color: "white",
-              marginRight: "2rem",
-              padding: "0.5rem 1rem",
-              borderRadius: "1rem",
+                ":hover": {
+                  backgroundColor: darkPink,
+                },
+              }}
+            >
+              Registro
+            </Button>
+          </a>
+          <a href="/login">
+            <Button
+              sx={{
+                backgroundColor: pink,
+                fontWeight: "bold",
+                textTransform: "none",
+                color: "white",
+                marginRight: "2rem",
+                padding: "0.5rem 1rem",
+                borderRadius: "1rem",
 
-              ":hover": {
-                backgroundColor: darkPink,
-              },
-            }}
-          >
-            Iniciar Sesión
-          </Button>
+                ":hover": {
+                  backgroundColor: darkPink,
+                },
+              }}
+            >
+              Iniciar Sesión
+            </Button>
+          </a>
         </Toolbar>
       </AppBar>
 
@@ -356,7 +360,10 @@ const One = () => {
                         alignItems: "center",
                       }}
                     >
-                      <Typography variant="body1" style={{ color: orange, fontWeight: "bold" }}>
+                      <Typography
+                        variant="body1"
+                        style={{ color: orange, fontWeight: "bold" }}
+                      >
                         Visitar base de datos
                       </Typography>
                       <ArrowForwardIcon
