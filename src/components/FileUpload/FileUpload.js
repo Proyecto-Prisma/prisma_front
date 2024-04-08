@@ -69,13 +69,13 @@ const FileUpload = () => {
     formData.append("wos_file", wosFile);
 
     try {
-      await axios.post("http://82.165.212.88/data/upload", formData, {
+      await axios.post("https://82.165.212.88/data/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
       // After successful upload, call the /process endpoint
-      await axios.get("http://82.165.212.88/data/process");
+      await axios.get("https://82.165.212.88/data/process");
       setDataProcessed(true); // Enable the Export Data button
       toast.success("Archivos procesados con éxito. Listo para exportar.");
     } catch (error) {
@@ -90,7 +90,7 @@ const FileUpload = () => {
 
   const handleExport = async () => {
     try {
-      const response = await axios.get("http://82.165.212.88/data/export", {
+      const response = await axios.get("https://82.165.212.88/data/export", {
         responseType: "blob", // Ensure the response is treated as a Blob
       });
       const fileURL = window.URL.createObjectURL(new Blob([response.data]));
