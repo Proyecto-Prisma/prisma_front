@@ -22,12 +22,12 @@ const Graphs = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const responseKeywords = await axios.get('http://127.0.0.1:5000/data/visualize/keywords');
-        const responseCountries = await axios.get('http://127.0.0.1:5000/data/visualize/countries');
-        const responseCitedTimes = await axios.get('http://127.0.0.1:5000/data/visualize/cited_times');
-        const responseAuthors = await axios.get('http://127.0.0.1:5000/data/visualize/authors'); // Agregamos la nueva solicitud para autores
-        const responsePublicationYears = await axios.get('http://127.0.0.1:5000/data/visualize/publication_years'); // Agregamos la nueva solicitud para años de publicación
-        const responseAbstractKeywords = await axios.get('http://127.0.0.1:5000/data/visualize/abstract'); // Agregamos la nueva solicitud para resúmenes
+        const responseKeywords = await axios.get('http://82.165.212.88:8000/data/visualize/keywords');
+        const responseCountries = await axios.get('http://82.165.212.88:8000/data/visualize/countries');
+        const responseCitedTimes = await axios.get('http://82.165.212.88:8000/data/visualize/cited_times');
+        const responseAuthors = await axios.get('http://82.165.212.88:8000/data/visualize/authors'); // Agregamos la nueva solicitud para autores
+        const responsePublicationYears = await axios.get('http://82.165.212.88:8000/data/visualize/publication_years'); // Agregamos la nueva solicitud para años de publicación
+        const responseAbstractKeywords = await axios.get('http://82.165.212.88:8000/data/visualize/abstract'); // Agregamos la nueva solicitud para resúmenes
 
         setChartData({
           keywords: responseKeywords.data.chart_data,
