@@ -69,11 +69,17 @@ export default function Login() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
     try {
-      const response = await axios.post("http://82.165.212.88:8000/auth/login", {
-        email,
-        password,
-      });
+      const response = await axios.post(
+        "http://82.165.212.88:8000/auth/login",
+        { email, password },
+        config
+      );
       toast.success(response.data.message);
       // Navigate to dashboard or another page upon successful login
       navigate("/prisma"); // Update this path as needed
@@ -81,6 +87,7 @@ export default function Login() {
       toast.error(error.response?.data?.error || "An error occurred.");
     }
   };
+  
 
   return (
     <ThemeProvider theme={theme}>

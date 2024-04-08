@@ -66,6 +66,11 @@ export default function SignUp() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
     if (password !== confirmPassword) {
       toast.error("Passwords do not match!");
       return;
@@ -75,6 +80,7 @@ export default function SignUp() {
       await axios.post("http://82.165.212.88:8000/auth/signup", {
         email,
         password,
+        config
       });
       toast.success("Registration successful! Please login.");
       // Redirect to login page or other action
