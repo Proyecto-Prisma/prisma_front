@@ -4,7 +4,7 @@ import Button from "@mui/material/Button";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const FileUpload = () => {
+const FileUpload = ({ searchString }) => {
   const pink = "#FF005B";
   const darkPink = "#C0005E";
   const [scopusFile, setScopusFile] = useState(null);
@@ -59,23 +59,35 @@ const FileUpload = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!scopusFile || !wosFile) {
-      toast.error("Se requieren ambos archivos.");
+    if (!scopusFile || !wosFile || !searchString) {
+      toast.error("Se requieren la cadena de búsqueda y ambos archivos.");
       return;
     }
 
     const formData = new FormData();
     formData.append("scopus_file", scopusFile);
     formData.append("wos_file", wosFile);
+    formData.append("cadena_busqueda", searchString);
+    formData.append("user_uid", "wPaqC6J6Swf7X4Qwf33iIlUxxeG3");
 
     try {
-      await axios.post("https://82.165.212.88/data/upload", formData, {
+      const response = await axios.post("http://127.0.0.1:8080/data/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
+
+      // Check if the response has the 'upload_key'
+      if (response.data && response.data.upload_key) {
+        // Save the upload key in localStorage
+        localStorage.setItem('upload_key', response.data.upload_key);
+        console.log('Upload key saved:', response.data.upload_key);
+      } else {
+        console.log('Upload key not found in the response');
+      }
+
       // After successful upload, call the /process endpoint
-      await axios.get("https://82.165.212.88/data/process");
+      await axios.get("http://127.0.0.1:8080/data/process");
       setDataProcessed(true); // Enable the Export Data button
       toast.success("Archivos procesados con éxito. Listo para exportar.");
     } catch (error) {
@@ -83,14 +95,19 @@ const FileUpload = () => {
 
       toast.error(
         error.response?.data?.error ||
-          "Ocurrió un error durante la carga o el procesamiento."
+        "Ocurrió un error durante la carga o el procesamiento."
       );
     }
   };
 
   const handleExport = async () => {
     try {
-      const response = await axios.get("https://82.165.212.88/data/export", {
+      const formData = new FormData();
+      formData.append('folder_id', localStorage.getItem('upload_key'));
+      const response = await axios.post("http://127.0.0.1:8080/data/export", formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        },
         responseType: "blob", // Ensure the response is treated as a Blob
       });
       const fileURL = window.URL.createObjectURL(new Blob([response.data]));

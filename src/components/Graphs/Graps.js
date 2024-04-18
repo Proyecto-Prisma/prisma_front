@@ -22,12 +22,12 @@ const Graphs = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const responseKeywords = await axios.get('https://82.165.212.88/data/visualize/keywords');
-        const responseCountries = await axios.get('https://82.165.212.88/data/visualize/countries');
-        const responseCitedTimes = await axios.get('https://82.165.212.88/data/visualize/cited_times');
-        const responseAuthors = await axios.get('https://82.165.212.88/data/visualize/authors'); // Agregamos la nueva solicitud para autores
-        const responsePublicationYears = await axios.get('https://82.165.212.88/data/visualize/publication_years'); // Agregamos la nueva solicitud para años de publicación
-        const responseAbstractKeywords = await axios.get('https://82.165.212.88/data/visualize/abstract'); // Agregamos la nueva solicitud para resúmenes
+        const responseKeywords = await axios.get('https://flask-fire-qwreg2y2oq-uc.a.run.app/data/visualize/keywords');
+        const responseCountries = await axios.get('https://flask-fire-qwreg2y2oq-uc.a.run.app/data/visualize/countries');
+        const responseCitedTimes = await axios.get('https://flask-fire-qwreg2y2oq-uc.a.run.app/data/visualize/cited_times');
+        const responseAuthors = await axios.get('https://flask-fire-qwreg2y2oq-uc.a.run.app/data/visualize/authors'); // Agregamos la nueva solicitud para autores
+        const responsePublicationYears = await axios.get('https://flask-fire-qwreg2y2oq-uc.a.run.app/data/visualize/publication_years'); // Agregamos la nueva solicitud para años de publicación
+        const responseAbstractKeywords = await axios.get('https://flask-fire-qwreg2y2oq-uc.a.run.app/data/visualize/abstract'); // Agregamos la nueva solicitud para resúmenes
 
         setChartData({
           keywords: responseKeywords.data.chart_data,
@@ -35,7 +35,7 @@ const Graphs = () => {
           citedTimes: responseCitedTimes.data.chart_data,
           authors: responseAuthors.data.chart_data, // Agregamos los datos de autores
           publicationYears: responsePublicationYears.data.chart_data, // Agregamos los datos de años de publicación
-          abstract: responseAbstractKeywords.data.chart_data, // Agregamos los datos de resúmenes  
+          abstract: responseAbstractKeywords.data.chart_data, // Agregamos los datos de resúmenes
            // Imprimimos los datos de resúmenes en la consola
         });
         console.log('Abstracts:', responseCountries.data.chart_data);
@@ -59,10 +59,10 @@ const Graphs = () => {
     const maxFrequency = 100; // Este es solo un valor de ejemplo, puedes ajustarlo según tus datos
     const minColor = [0, 0, 255]; // Azul
     const maxColor = [255, 0, 0]; // Rojo
-    
+
     // Calculamos el color interpolando entre minColor y maxColor según la frecuencia
     const color = maxColor.map((max, i) => Math.round((max - minColor[i]) * (frequency / maxFrequency) + minColor[i]));
-  
+
     // Convertimos el color a formato hexadecimal
     return `rgb(${color.join(',')})`;
   };
@@ -253,13 +253,13 @@ const Graphs = () => {
               </Typography>
               <div style={{ height: 400 }}> {/* Altura ajustable según sea necesario */}
                 <ReactWordcloud words={chartData.abstract} options={options} />
-    
+
               </div>
             </Paper>
           </Grid>
         </Grid>
 
-        
+
         <Grid container spacing={3}>
   <Grid item xs={12} md={6}>
     <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }}>

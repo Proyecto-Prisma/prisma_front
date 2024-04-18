@@ -76,7 +76,7 @@ export default function Login() {
     };
     try {
       const response = await axios.post(
-        "https://82.165.212.88/auth/login",
+        "https://flask-fire-qwreg2y2oq-uc.a.run.app/auth/login",
         { email, password },
         config
       );
@@ -87,7 +87,7 @@ export default function Login() {
       toast.error(error.response?.data?.error || "An error occurred.");
     }
   };
-  
+
 
   return (
     <ThemeProvider theme={theme}>
