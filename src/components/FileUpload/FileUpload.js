@@ -71,7 +71,7 @@ const FileUpload = ({ searchString }) => {
     formData.append("user_uid", "wPaqC6J6Swf7X4Qwf33iIlUxxeG3");
 
     try {
-      const response = await axios.post("http://127.0.0.1:8080/data/upload", formData, {
+      const response = await axios.post("https://flask-fire-qwreg2y2oq-uc.a.run.app/data/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -87,7 +87,7 @@ const FileUpload = ({ searchString }) => {
       }
 
       // After successful upload, call the /process endpoint
-      await axios.get("http://127.0.0.1:8080/data/process");
+      await axios.get("https://flask-fire-qwreg2y2oq-uc.a.run.app/data/process");
       setDataProcessed(true); // Enable the Export Data button
       toast.success("Archivos procesados con éxito. Listo para exportar.");
     } catch (error) {
@@ -104,7 +104,7 @@ const FileUpload = ({ searchString }) => {
     try {
       const formData = new FormData();
       formData.append('folder_id', localStorage.getItem('upload_key'));
-      const response = await axios.post("http://127.0.0.1:8080/data/export", formData, {
+      const response = await axios.post("https://flask-fire-qwreg2y2oq-uc.a.run.app/data/export", formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         },
