@@ -6,7 +6,8 @@ import { Cell } from 'recharts';
 import ReactWordcloud from 'react-wordcloud';
 import { TableContainer, Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material';
 import { Chart } from "react-google-charts";
-
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 const Graphs = () => {
   const [chartData, setChartData] = useState({
@@ -68,6 +69,38 @@ const Graphs = () => {
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AF19FF', '#FFC0CB']; // Puedes agregar más colores según sea necesario
 
+  const downloadChartsAsPDF = () => {
+    const charts = document.querySelectorAll('.graph-container');
+  
+    const pdf = new jsPDF();
+  
+    const downloadNextChart = index => {
+      if (index < charts.length) {
+        const chart = charts[index];
+        html2canvas(chart, { scale: 4 }).then(canvas => {
+          const imgData = canvas.toDataURL('image/png');
+          pdf.addImage(imgData, 'PNG', 10, 10, 180, 100);
+          pdf.addPage();
+          downloadNextChart(index + 1);
+        });
+      } else {
+        pdf.save('charts.pdf');
+      }
+    };
+  
+    downloadNextChart(0);
+  };
+
+  const downloadChartAsPNG = (chartId) => {
+    const chart = document.getElementById(chartId);
+    html2canvas(chart).then(canvas => {
+      const link = document.createElement('a');
+      link.download = `${chartId}.png`;
+      link.href = canvas.toDataURL();
+      link.click();
+    });
+  };
+
   return (
     <Box mt={4} mx={4}>
       <Grid container spacing={3}>
@@ -89,6 +122,7 @@ const Graphs = () => {
                 backgroundColor: "#C0005E",
               },
             }}
+            onClick={downloadChartsAsPDF}
           >
             Descargar
           </Button>
@@ -101,7 +135,7 @@ const Graphs = () => {
 
       <Grid container spacing={3}>
         <Grid item xs={12} sm={6} md={4}>
-          <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }}>
+          <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }} id="chart1" className="graph-container">
             <Typography variant="h6" gutterBottom style={{ fontWeight: 'bold' }}>
               Keywords Frequency
             </Typography>
@@ -122,11 +156,14 @@ const Graphs = () => {
               <Tooltip />
             </BarChart>
           </Paper>
+          <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart1')}>
+            Descargar PNG
+          </Button>
         </Grid>
 
 
         <Grid item xs={12} sm={6} md={4}>
-          <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }}>
+          <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }} id="chart2" className="graph-container">
             <Typography variant="h6" gutterBottom style={{ fontWeight: 'bold' }}>
               Keywords Frequency
             </Typography>
@@ -146,10 +183,13 @@ const Graphs = () => {
               <Tooltip />
             </RadarChart>
           </Paper>
+          <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart2')}>
+            Descargar PNG
+          </Button>
         </Grid>
 
         <Grid item xs={12} md={4}>
-          <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }}>
+          <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }} id="chart3" className="graph-container">
             <Typography variant="h6" gutterBottom style={{ fontWeight: 'bold' }}>
               Keywords Pie Chart
             </Typography>
@@ -173,6 +213,9 @@ const Graphs = () => {
               <Legend wrapperStyle={{ bottom: "-15px" }} />
             </PieChart>
           </Paper>
+          <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart3')}>
+            Descargar PNG
+          </Button>
         </Grid>
 
 
@@ -185,7 +228,7 @@ const Graphs = () => {
       <Grid container spacing={3}>
 
       <Grid item xs={12} sm={6} md={4}>
-        <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }}>
+        <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }} id="chart4" className="graph-container">
           <Typography variant="h6" gutterBottom style={{ fontWeight: 'bold' }}>
             Articles Table
           </Typography>
@@ -208,10 +251,13 @@ const Graphs = () => {
             </Table>
           </TableContainer>
         </Paper>
+        <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart4')}>
+          Descargar PNG
+        </Button>
       </Grid>
 
       <Grid item xs={12} sm={6} md={4}>
-        <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }}>
+        <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }} id="chart5" className="graph-container">
           <Typography variant="h6" gutterBottom style={{ fontWeight: 'bold' }}>
             Cited Times Chart (By index)
           </Typography>
@@ -228,10 +274,13 @@ const Graphs = () => {
             />
           </BarChart>
         </Paper>
+        <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart5')}>
+          Descargar PNG
+        </Button>
       </Grid>
 
       <Grid item xs={12} sm={6} md={4}>
-        <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }}>
+        <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }} id="chart6" className="graph-container">
           <Typography variant="h6" gutterBottom style={{ fontWeight: 'bold' }}>
             Cited Times PieChart (By index)
           </Typography>
@@ -256,6 +305,9 @@ const Graphs = () => {
             <Legend />
           </PieChart>
         </Paper>
+        <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart6')}>
+          Descargar PNG
+        </Button>
       </Grid>
     </Grid>
 
@@ -266,7 +318,7 @@ const Graphs = () => {
       <Grid container spacing={3}>
 
       <Grid item xs={12} sm={6} md={4}>
-        <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }}>
+        <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }} id="chart7" className="graph-container">
           <Typography variant="h6" gutterBottom style={{ fontWeight: 'bold' }}>
             Authors Geographic Distribution
           </Typography>
@@ -282,10 +334,13 @@ const Graphs = () => {
             </Bar>
           </BarChart>
         </Paper>
+        <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart7')}>
+          Descargar PNG
+        </Button>
       </Grid>
 
       <Grid item xs={12} sm={6} md={4}>
-        <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }}>
+        <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }} id="chart8" className="graph-container">
           <Typography variant="h6" gutterBottom style={{ fontWeight: 'bold' }}>
             Publication Years
           </Typography>
@@ -300,10 +355,13 @@ const Graphs = () => {
           </BarChart>
           
         </Paper>
+        <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart8')}>
+          Descargar PNG
+        </Button>
       </Grid>
 
         <Grid item xs={12} sm={6} md={4}>
-          <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }}>
+          <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }} id="chart9" className="graph-container">
             <Typography variant="h6" gutterBottom style={{ fontWeight: 'bold' }}>
               Publication Years
             </Typography>
@@ -315,6 +373,9 @@ const Graphs = () => {
               <Line type="monotone" dataKey="frequency" stroke="#FF7043" label={{ position: 'top' }} />
             </LineChart>
           </Paper>
+          <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart9')}>
+            Descargar PNG
+          </Button>
         </Grid>
       </Grid>
 
@@ -326,7 +387,7 @@ const Graphs = () => {
       <Grid container spacing={3}>
 
         <Grid item xs={12} sm={6} md={4}>
-          <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }}>
+          <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }} id="chart10" className="graph-container">
             <Typography variant="h6" gutterBottom style={{ fontWeight: 'bold' }}>
               Word Cloud from abstract
             </Typography>
@@ -334,6 +395,9 @@ const Graphs = () => {
               <ReactWordcloud words={chartData.abstract} options={options} />
             </div>
           </Paper>
+          <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart10')}>
+            Descargar PNG
+          </Button>
         </Grid>
         
       </Grid>
@@ -345,7 +409,7 @@ const Graphs = () => {
       <Grid container spacing={3}>
 
       <Grid item xs={12} sm={6} md={4}>
-          <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }}>
+          <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }} id="chart11" className="graph-container">
             <Typography variant="h6" gutterBottom style={{ fontWeight: 'bold' }}>
               Countries
             </Typography>
@@ -367,12 +431,15 @@ const Graphs = () => {
               <Legend />
             </PieChart>
           </Paper>
+          <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart11')}>
+            Descargar PNG
+          </Button>
         </Grid>
 
       
 
         <Grid item xs={12} sm={6} md={4}>
-          <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }}>
+          <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }} id="chart12" className="graph-container">
           <Typography variant="h6" gutterBottom style={{ fontWeight: 'bold' }}>
             Countries Map
           </Typography>
@@ -395,10 +462,13 @@ const Graphs = () => {
             data={data}
           />
           </Paper>
+          <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart12')}>
+            Descargar PNG
+          </Button>
         </Grid>
 
         <Grid item xs={12} sm={6} md={4}>
-          <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }}>
+          <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }} id="chart13" className="graph-container">
             <Typography variant="h6" gutterBottom style={{ fontWeight: 'bold' }}>
               Countries Frequency
             </Typography>
@@ -425,6 +495,9 @@ const Graphs = () => {
               </Table>
             </TableContainer>
           </Paper>
+          <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart13')}>
+            Descargar PNG
+          </Button>
         </Grid>
 
   
