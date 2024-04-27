@@ -77,7 +77,7 @@ export default function SignUp() {
     }
 
     try {
-      await axios.post("https://82.165.212.88/auth/signup", {
+      await axios.post("http://127.0.0.1:8080/auth/signup", {
         email,
         password,
         config
