@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Button, Grid, Paper, Typography } from '@mui/material';
-import { BarChart, Bar, PieChart, Pie, RadarChart, PolarGrid, PolarAngleAxis, Radar, XAxis, YAxis, Tooltip, Legend, LineChart, Line } from 'recharts'; // Agregamos LabelList de recharts
+import { BarChart, Bar, PieChart, Pie, RadarChart, PolarGrid, PolarAngleAxis, Radar, XAxis, YAxis, Tooltip, LabelList, Legend, LineChart, Line } from 'recharts';
 import axios from 'axios';
-import {Cell } from 'recharts'; // Importamos las componentes necesarias
-import ReactWordcloud from 'react-wordcloud'; // Importamos ReactWordcloud
-import { ComposableMap, Geographies, Geography } from 'react-simple-maps'; // Importamos los componentes de react-simple-maps
-import customGeoJSON from './custom.geo.json';
-import {TableContainer, Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material'; // Asegúrate de importar los componentes necesarios de Material-UI
-
+import { Cell } from 'recharts';
+import ReactWordcloud from 'react-wordcloud';
+import { TableContainer, Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material';
+import { Chart } from "react-google-charts";
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 const Graphs = () => {
   const [chartData, setChartData] = useState({
@@ -22,23 +22,27 @@ const Graphs = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const responseKeywords = await axios.get('http://127.0.0.1:8080/data/visualize/keywords');
-        const responseCountries = await axios.get('http://127.0.0.1:8080/data/visualize/countries');
-        const responseCitedTimes = await axios.get('http://127.0.0.1:8080/data/visualize/cited_times');
-        const responseAuthors = await axios.get('http://127.0.0.1:8080/data/visualize/authors'); // Agregamos la nueva solicitud para autores
-        const responsePublicationYears = await axios.get('http://127.0.0.1:8080/data/visualize/publication_years'); // Agregamos la nueva solicitud para años de publicación
-        const responseAbstractKeywords = await axios.get('http://127.0.0.1:8080/data/visualize/abstract'); // Agregamos la nueva solicitud para resúmenes
+        const responses = await Promise.all([
+          axios.get('http://127.0.0.1:5000/data/visualize/keywords'),
+          axios.get('http://127.0.0.1:5000/data/visualize/countries'),
+          axios.get('http://127.0.0.1:5000/data/visualize/cited_times'),
+          axios.get('http://127.0.0.1:5000/data/visualize/authors'),
+          axios.get('http://127.0.0.1:5000/data/visualize/publication_years'),
+          axios.get('http://127.0.0.1:5000/data/visualize/abstract'),
+        ]);
 
-        setChartData({
-          keywords: responseKeywords.data.chart_data,
-          countries: responseCountries.data.chart_data,
-          citedTimes: responseCitedTimes.data.chart_data,
-          authors: responseAuthors.data.chart_data, // Agregamos los datos de autores
-          publicationYears: responsePublicationYears.data.chart_data, // Agregamos los datos de años de publicación
-          abstract: responseAbstractKeywords.data.chart_data, // Agregamos los datos de resúmenes
-           // Imprimimos los datos de resúmenes en la consola
-        });
-        console.log('Abstracts:', responseCountries.data.chart_data);
+        const chartData = {
+          keywords: responses[0].data.chart_data,
+          countries: responses[1].data.chart_data,
+          citedTimes: responses[2].data.chart_data,
+          authors: responses[3].data.chart_data,
+          publicationYears: responses[4].data.chart_data,
+          abstract: responses[5].data.chart_data,
+        };
+          
+
+        setChartData(chartData);
+        console.log("Datos recibidos para países:", chartData.countries);
       } catch (error) {
         console.error('Error fetching chart data:', error);
       }
@@ -51,21 +55,6 @@ const Graphs = () => {
     return '#' + Math.floor(Math.random()*16777215).toString(16);
   };
 
-  const getColorFromFrequency = (frequency) => {
-    // Aquí puedes definir tu lógica para asignar colores basados en la frecuencia
-    // Por ejemplo, puedes asignar un rango de colores basado en la frecuencia
-    // Cuanto mayor sea la frecuencia, más oscuro será el color, etc.
-    // Por simplicidad, aquí utilizaremos un gradiente de azul a rojo basado en la frecuencia
-    const maxFrequency = 100; // Este es solo un valor de ejemplo, puedes ajustarlo según tus datos
-    const minColor = [0, 0, 255]; // Azul
-    const maxColor = [255, 0, 0]; // Rojo
-
-    // Calculamos el color interpolando entre minColor y maxColor según la frecuencia
-    const color = maxColor.map((max, i) => Math.round((max - minColor[i]) * (frequency / maxFrequency) + minColor[i]));
-
-    // Convertimos el color a formato hexadecimal
-    return `rgb(${color.join(',')})`;
-  };
 
   const options = {
     rotations: 0,
@@ -73,8 +62,47 @@ const Graphs = () => {
     fontSizes: [40, 60],
   };
 
+  const data = [
+    ['Country', 'Popularity'],
+    ...chartData.countries.map((countryData) => [countryData.country, countryData.frequency]),
+  ];
+
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AF19FF', '#FFC0CB']; // Puedes agregar más colores según sea necesario
+
+  const downloadChartsAsPDF = () => {
+    const charts = document.querySelectorAll('.graph-container');
+  
+    const pdf = new jsPDF();
+  
+    const downloadNextChart = index => {
+      if (index < charts.length) {
+        const chart = charts[index];
+        html2canvas(chart, { scale: 4 }).then(canvas => {
+          const imgData = canvas.toDataURL('image/png');
+          pdf.addImage(imgData, 'PNG', 10, 10, 180, 100);
+          pdf.addPage();
+          downloadNextChart(index + 1);
+        });
+      } else {
+        pdf.save('charts.pdf');
+      }
+    };
+  
+    downloadNextChart(0);
+  };
+
+  const downloadChartAsPNG = (chartId) => {
+    const chart = document.getElementById(chartId);
+    html2canvas(chart).then(canvas => {
+      const link = document.createElement('a');
+      link.download = `${chartId}.png`;
+      link.href = canvas.toDataURL();
+      link.click();
+    });
+  };
+
   return (
-    <Box mt={4}>
+    <Box mt={4} mx={4}>
       <Grid container spacing={3}>
         <Grid item xs={8}>
           <Typography variant="h4" mb={4}>
@@ -94,40 +122,298 @@ const Graphs = () => {
                 backgroundColor: "#C0005E",
               },
             }}
+            onClick={downloadChartsAsPDF}
           >
             Descargar
           </Button>
         </Grid>
       </Grid>
 
+      <Typography variant="h5" mt={4} mb={2}>
+        Seccion 1
+      </Typography>
+
       <Grid container spacing={3}>
-        <Grid item xs={12} md={4}>
-          <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }}>
-            <Typography variant="h6" gutterBottom>
+        <Grid item xs={12} sm={6} md={4}>
+          <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }} id="chart1" className="graph-container">
+            <Typography variant="h6" gutterBottom style={{ fontWeight: 'bold' }}>
               Keywords Frequency
             </Typography>
-            <BarChart width={400} height={300} data={chartData.keywords}>
+            <BarChart
+              width={450}
+              height={400}
+              data={chartData.keywords}
+              margin={{ bottom: 50, left: 50}}
+            >
               <Bar dataKey="frequency">
+                {chartData.keywords.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={generateRandomColor()} />
+                ))}
+                <LabelList dataKey="frequency" position="top" />
+              </Bar>
+              <XAxis dataKey="keyword" angle={-45} textAnchor="end" interval={0} height={100} />
+              <YAxis />
+              <Tooltip />
+            </BarChart>
+          </Paper>
+          <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart1')}>
+            Descargar PNG
+          </Button>
+        </Grid>
+
+
+        <Grid item xs={12} sm={6} md={4}>
+          <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }} id="chart2" className="graph-container">
+            <Typography variant="h6" gutterBottom style={{ fontWeight: 'bold' }}>
+              Keywords Frequency
+            </Typography>
+            <RadarChart width={600} height={300} margin={{ bottom: 50, left: 50}} data={chartData.keywords}>
+              <PolarGrid />
+              <PolarAngleAxis dataKey="keyword" />
+              <Radar
+                dataKey="frequency"
+                stroke="#F06292"
+                fill="#F06292"
+                fillOpacity={0.6}
+                label={{
+                  position: 'inside', 
+                  offset: 5, 
+                }}
+              />
+              <Tooltip />
+            </RadarChart>
+          </Paper>
+          <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart2')}>
+            Descargar PNG
+          </Button>
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }} id="chart3" className="graph-container">
+            <Typography variant="h6" gutterBottom style={{ fontWeight: 'bold' }}>
+              Keywords Pie Chart
+            </Typography>
+            <PieChart width={450} height={400}>
+              <Pie
+                data={chartData.keywords}
+                dataKey="frequency"
+                nameKey="keyword"
+                cx="50%"
+                cy="50%"
+                outerRadius={80}
+                label
+              >
                 {
                   chartData.keywords.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={generateRandomColor()} />
                   ))
                 }
-              </Bar>
-              <XAxis dataKey="keyword" />
-              <YAxis />
+              </Pie>
               <Tooltip />
-              <Legend />
-            </BarChart>
+              <Legend wrapperStyle={{ bottom: "-15px" }} />
+            </PieChart>
           </Paper>
+          <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart3')}>
+            Descargar PNG
+          </Button>
         </Grid>
 
-        <Grid item xs={12} md={4}>
-          <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }}>
-            <Typography variant="h6" gutterBottom>
+
+      </Grid>
+
+      <Typography variant="h5" mt={4} mb={2}>
+        Seccion 2
+      </Typography>
+
+      <Grid container spacing={3}>
+
+      <Grid item xs={12} sm={6} md={4}>
+        <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }} id="chart4" className="graph-container">
+          <Typography variant="h6" gutterBottom style={{ fontWeight: 'bold' }}>
+            Articles Table
+          </Typography>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Index</TableCell>
+                  <TableCell>Title</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {chartData.citedTimes.map((article, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{article.row_number}</TableCell>
+                    <TableCell>{article.title}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Paper>
+        <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart4')}>
+          Descargar PNG
+        </Button>
+      </Grid>
+
+      <Grid item xs={12} sm={6} md={4}>
+        <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }} id="chart5" className="graph-container">
+          <Typography variant="h6" gutterBottom style={{ fontWeight: 'bold' }}>
+            Cited Times Chart (By index)
+          </Typography>
+          <BarChart width={400} height={400} data={chartData.citedTimes}>
+            <Bar dataKey="cited_times" fill="#BA68C8">
+              <LabelList dataKey="cited_times" position="top" />
+            </Bar>
+            <XAxis dataKey="row_number" label={{ value: 'Article Index', position: 'insideBottom', dy: 10 }} />
+            <YAxis label={{ value: 'Frequency', angle: -90, position: 'insideLeft' }} />
+            <Tooltip 
+              cursor={{ fill: 'transparent' }} 
+              contentStyle={{ textAlign: 'left' }} 
+              formatter={(value, name, props) => [`${props.payload.title}: ${value}`, 'Article Title']} // Modificado para mostrar título y frecuencia
+            />
+          </BarChart>
+        </Paper>
+        <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart5')}>
+          Descargar PNG
+        </Button>
+      </Grid>
+
+      <Grid item xs={12} sm={6} md={4}>
+        <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }} id="chart6" className="graph-container">
+          <Typography variant="h6" gutterBottom style={{ fontWeight: 'bold' }}>
+            Cited Times PieChart (By index)
+          </Typography>
+          <PieChart width={400} height={400}>
+            <Pie
+              data={chartData.citedTimes}
+              dataKey="cited_times"
+              nameKey="row_number"
+              cx="50%"
+              cy="50%"
+              outerRadius={80}
+              fill="#BA68C8"
+              label
+            >
+              {
+                chartData.citedTimes.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))
+              }
+            </Pie>
+            <Tooltip formatter={(value, name, props) => [`${props.payload.title}: ${value}`, 'Article Title']} />
+            <Legend />
+          </PieChart>
+        </Paper>
+        <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart6')}>
+          Descargar PNG
+        </Button>
+      </Grid>
+    </Grid>
+
+    <Typography variant="h5" mt={4} mb={2}>
+        Seccion 2
+      </Typography>
+
+      <Grid container spacing={3}>
+
+      <Grid item xs={12} sm={6} md={4}>
+        <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }} id="chart7" className="graph-container">
+          <Typography variant="h6" gutterBottom style={{ fontWeight: 'bold' }}>
+            Authors Geographic Distribution
+          </Typography>
+          <BarChart width={500} height={400} data={chartData.countries} margin={{ bottom: 50 }}>
+            <XAxis dataKey="country" label={{ value: 'Country', position: 'insideBottom', offset: -10, style: { fontWeight: 'bold' } }} />
+            <YAxis label={{ value: 'Frequency', angle: -90, position: 'insideLeft', style: { fontWeight: 'bold' } }}  />
+            <Tooltip />
+            <Bar dataKey="frequency" fill="#8884d8">
+              <LabelList dataKey="frequency" position="top" fill="#000" fontSize={12} />
+              {chartData.countries.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={generateRandomColor()} />
+              ))}
+            </Bar>
+          </BarChart>
+        </Paper>
+        <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart7')}>
+          Descargar PNG
+        </Button>
+      </Grid>
+
+      <Grid item xs={12} sm={6} md={4}>
+        <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }} id="chart8" className="graph-container">
+          <Typography variant="h6" gutterBottom style={{ fontWeight: 'bold' }}>
+            Publication Years
+          </Typography>
+          <BarChart width={400} height={400} data={chartData.publicationYears} margin={{ bottom: 50 }}>
+            <XAxis dataKey="year" label={{ value: 'Year', position: 'insideBottom', offset: -10, style: { fontWeight: 'bold' } }} />
+            <YAxis label={{ value: 'Frequency', angle: -90, position: 'insideLeft', style: { fontWeight: 'bold' } }}  />
+            <Tooltip />
+            
+            <Bar dataKey="frequency" fill="#FF7043">
+              <LabelList dataKey="frequency" position="top" />
+            </Bar>
+          </BarChart>
+          
+        </Paper>
+        <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart8')}>
+          Descargar PNG
+        </Button>
+      </Grid>
+
+        <Grid item xs={12} sm={6} md={4}>
+          <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }} id="chart9" className="graph-container">
+            <Typography variant="h6" gutterBottom style={{ fontWeight: 'bold' }}>
+              Publication Years
+            </Typography>
+            <LineChart width={400} height={400} data={chartData.publicationYears} margin={{ bottom: 50 }}>
+              <XAxis dataKey="year" label={{ value: 'Year', position: 'insideBottom', offset: -10, style: { fontWeight: 'bold' } }} />
+              <YAxis label={{ value: 'Frequency', angle: -90, position: 'insideLeft', style: { fontWeight: 'bold' } }}  />
+              <Tooltip />
+              
+              <Line type="monotone" dataKey="frequency" stroke="#FF7043" label={{ position: 'top' }} />
+            </LineChart>
+          </Paper>
+          <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart9')}>
+            Descargar PNG
+          </Button>
+        </Grid>
+      </Grid>
+
+
+      <Typography variant="h5" mt={4} mb={2}>
+        Seccion 3
+      </Typography>
+
+      <Grid container spacing={3}>
+
+        <Grid item xs={12} sm={6} md={4}>
+          <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }} id="chart10" className="graph-container">
+            <Typography variant="h6" gutterBottom style={{ fontWeight: 'bold' }}>
+              Word Cloud from abstract
+            </Typography>
+            <div style={{ height: 400 }}>
+              <ReactWordcloud words={chartData.abstract} options={options} />
+            </div>
+          </Paper>
+          <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart10')}>
+            Descargar PNG
+          </Button>
+        </Grid>
+        
+      </Grid>
+
+      <Typography variant="h5" mt={4} mb={2}>
+        Seccion 3
+      </Typography>
+
+      <Grid container spacing={3}>
+
+      <Grid item xs={12} sm={6} md={4}>
+          <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }} id="chart11" className="graph-container">
+            <Typography variant="h6" gutterBottom style={{ fontWeight: 'bold' }}>
               Countries
             </Typography>
-            <PieChart width={400} height={300}>
+            <PieChart width={500} height={300}>
               <Pie
                 data={chartData.countries}
                 dataKey="frequency"
@@ -137,232 +423,88 @@ const Graphs = () => {
                 outerRadius={80}
                 label
               >
-                {
-                  chartData.countries.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={generateRandomColor()} />
-                  ))
-                }
+                {chartData.countries.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={generateRandomColor()} />
+                ))}
               </Pie>
               <Tooltip />
               <Legend />
             </PieChart>
           </Paper>
+          <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart11')}>
+            Descargar PNG
+          </Button>
         </Grid>
 
-        <Grid item xs={12} md={4}>
-          <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }}>
-            <Typography variant="h6" gutterBottom>
-              Radar Chart
-            </Typography>
-            <RadarChart width={400} height={300} data={chartData.keywords}>
-              <PolarGrid />
-              <PolarAngleAxis dataKey="keyword" />
-              <Radar
-                dataKey="frequency"
-                stroke="#F06292"
-                fill="#F06292"
-                fillOpacity={0.6}
-                label={{
-                  position: 'outside', // Puedes cambiar 'top' a 'inside' o 'outside' según tus preferencias
-                  offset: 50, // Ajusta este valor para cambiar la distancia entre el label y el punto de la gráfica
-                }}
-              />
-              <Tooltip />
-            </RadarChart>
-          </Paper>
-        </Grid>
+      
 
-
-        <Grid item xs={12} md={8}>
-        <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }}>
-          <Typography variant="h6" gutterBottom>
-            Keywords LineChart
+        <Grid item xs={12} sm={6} md={4}>
+          <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }} id="chart12" className="graph-container">
+          <Typography variant="h6" gutterBottom style={{ fontWeight: 'bold' }}>
+            Countries Map
           </Typography>
-          <LineChart width={800} height={300} data={chartData.keywords}>
-            <XAxis dataKey="keyword" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Line type="monotone" dataKey="frequency" stroke="#FF7043" label={{ position: 'top' }} />
-          </LineChart>
-        </Paper>
+          <Chart
+            chartEvents={[
+              {
+                eventName: "select",
+                callback: ({ chartWrapper }) => {
+                  const chart = chartWrapper.getChart();
+                  const selection = chart.getSelection();
+                  if (selection.length === 0) return;
+                  const region = data[selection[0].row + 1];
+                  console.log("Selected : " + region);
+                },
+              },
+            ]}
+            chartType="GeoChart"
+            width="100%"
+            height="400px"
+            data={data}
+          />
+          </Paper>
+          <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart12')}>
+            Descargar PNG
+          </Button>
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={4}>
+          <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }} id="chart13" className="graph-container">
+            <Typography variant="h6" gutterBottom style={{ fontWeight: 'bold' }}>
+              Countries Frequency
+            </Typography>
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Countrie</TableCell>
+                    <TableCell align="right">Frequency</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {chartData.countries.map((countryData, index) => (
+                    <TableRow key={index}>
+                      <TableCell>
+                        <span style={{ color: index === 0 ? 'red' : 'inherit' }}>{countryData.country}</span>
+                      </TableCell>
+                      <TableCell align="right">
+                        <span style={{ color: index === 0 ? 'red' : 'inherit' }}>{countryData.frequency}</span>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Paper>
+          <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart13')}>
+            Descargar PNG
+          </Button>
+        </Grid>
+
+  
+
+        
       </Grid>
 
-        <Grid item xs={12} md={8}>
-          <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }}>
-            <Typography variant="h6" gutterBottom>
-              Cited Times Chart
-            </Typography>
-            <BarChart width={800} height={300} data={chartData.citedTimes}>
-              <Bar dataKey="cited_times" fill="#BA68C8" />
-              <XAxis dataKey="title" />
-              <YAxis />
-              <Tooltip cursor={{ fill: 'transparent' }} />
-              <Legend />
-            </BarChart>
-          </Paper>
-        </Grid>
-
-        <Grid item xs={12} md={8}>
-          <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }}>
-            <Typography variant="h6" gutterBottom>
-              Publication Years
-            </Typography>
-            <LineChart width={800} height={300} data={chartData.publicationYears}>
-              <XAxis dataKey="year" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Line type="monotone" dataKey="frequency" stroke="#FF7043" label={{ position: 'top' }} />
-            </LineChart>
-          </Paper>
-        </Grid>
-
-        <Grid item xs={12} md={8}>
-          <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }}>
-            <Typography variant="h6" gutterBottom>
-              Authors
-            </Typography>
-            <PieChart width={800} height={300}>
-              <Pie
-                data={chartData.authors}
-                dataKey="frequency"
-                nameKey="author"
-                cx="50%"
-                cy="50%"
-                outerRadius={80}
-                label
-              >
-                {
-                  chartData.authors.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={generateRandomColor()} />
-                  ))
-                }
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </Paper>
-        </Grid>
-
-        <Grid container spacing={3}>
-          <Grid item xs={6} md={12}>
-            <Paper elevation={3} style={{ padding: 16, borderRadius: '1rem' }}>
-              <Typography variant="h6" gutterBottom>
-                Nube de palabras del abstract
-              </Typography>
-              <div style={{ height: 400 }}> {/* Altura ajustable según sea necesario */}
-                <ReactWordcloud words={chartData.abstract} options={options} />
-
-              </div>
-            </Paper>
-          </Grid>
-        </Grid>
-
-
-        <Grid container spacing={3}>
-  <Grid item xs={12} md={6}>
-    <Paper elevation={3} style={{ padding: 16, borderRadius: "1rem" }}>
-      <Typography variant="h6" gutterBottom>
-        Países
-      </Typography>
-      <ComposableMap
-        projection="geoMercator"
-        projectionConfig={{ scale: 120 }}
-        width={800}
-        height={500}
-      >
-        <Geographies geography={customGeoJSON}>
-          {({ geographies }) =>
-            geographies.map((geo) => {
-              const countryName = geo.properties && geo.properties.name ? geo.properties.name.trim().toUpperCase() : null;
-              const listNames = chartData.countries.map((data) => data.country.toUpperCase());
-
-              console.log('Country Name:', countryName);
-              console.log('List Names:', listNames);
-
-              // Verificar si el nombre del país está en la lista de nombres
-              const isInList = listNames.includes(countryName);
-
-              // Si el país está en la lista, colorearlo, de lo contrario, dejarlo gris
-              const fillColor = isInList ? getColorFromFrequency(chartData.countries.find((data) => data.country.toUpperCase() === countryName).frequency) : '#cccccc';
-
-              // Obtener el valor de la frecuencia para la etiqueta
-              const frequencyLabel = chartData.countries.find((data) => data.country.toUpperCase() === countryName)?.frequency;
-
-              return (
-                <React.Fragment key={geo.rsmKey}>
-                  <Geography
-                    geography={geo}
-                    fill={fillColor}
-                    style={{
-                      hover: {
-                        fill: '#F53',
-                        outline: 'none',
-                      },
-                    }}
-                  />
-                  {frequencyLabel && geo.centroid && (
-                    <text
-                      x={geo.centroid[0]}
-                      y={geo.centroid[1]}
-                      style={{
-                        fontFamily: 'Arial, sans-serif',
-                        fontSize: '10px',
-                        fill: '#000',
-                        pointerEvents: 'none',
-                        userSelect: 'none',
-                      }}
-                      textAnchor="middle"
-                    >
-                      {frequencyLabel}
-                    </text>
-                  )}
-                </React.Fragment>
-              );
-            })
-          }
-        </Geographies>
-      </ComposableMap>
-    </Paper>
-  </Grid>
-
-  {/* Datos de frecuencia de países */}
-  <Grid item xs={12} md={6}>
-    <Paper elevation={3} style={{ padding: 16, borderRadius: '1rem' }}>
-      <Typography variant="h6" gutterBottom>
-        Frecuencia de Países
-      </Typography>
-      <TableContainer>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>País</TableCell>
-              <TableCell align="right">Frecuencia</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {chartData.countries.map((countryData, index) => (
-              <TableRow key={index}>
-                <TableCell>{countryData.country}</TableCell>
-                <TableCell align="right">
-                  <span style={{ fontWeight: 'bold', color: countryData.frequency > 50 ? 'red' : 'inherit' }}>
-                    {countryData.frequency}
-                  </span>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Paper>
-  </Grid>
-</Grid>
-
-
-
-
-      </Grid>
     </Box>
   );
 };
