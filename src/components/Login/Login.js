@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";  // Import useContext if you're using context
+import  AuthContext  from '../../AuthContext.js'; 
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -65,29 +66,31 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate(); // Updated to useNavigate
-  // const { setAuthData } = useContext(AuthContext); // If using context for auth state
+  const { setAuthData } = useContext(AuthContext); // Assuming you manage auth state in context
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     const config = {
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     };
     try {
       const response = await axios.post(
-        "https://flask-fire-qwreg2y2oq-uc.a.run.app/auth/login",
+        "http://127.0.0.1:8080/auth/login",
         { email, password },
         config
       );
-      toast.success(response.data.message);
-      // Navigate to dashboard or another page upon successful login
-      navigate("/prisma"); // Update this path as needed
+      const { token, uid } = response.data; // Get UID from response
+      console.log(response)
+      setAuthData({ token, uid }); // Store token and UID in context or another state management
+      console.log("UID:", uid);
+      toast.success("Login successful");
+      navigate("/prisma"); // Navigate to a protected route
     } catch (error) {
       toast.error(error.response?.data?.error || "An error occurred.");
     }
   };
-
 
   return (
     <ThemeProvider theme={theme}>

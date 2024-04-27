@@ -77,7 +77,7 @@ export default function SignUp() {
     }
 
     try {
-      await axios.post("https://flask-fire-qwreg2y2oq-uc.a.run.app/auth/signup", {
+      await axios.post("http://127.0.0.1:8080/auth/signup", {
         email,
         password,
         config
