@@ -23,12 +23,12 @@ const Graphs = () => {
     const fetchData = async () => {
       try {
         const responses = await Promise.all([
-          axios.get('http://127.0.0.1:8080/data/visualize/keywords'),
-          axios.get('http://127.0.0.1:8080/data/visualize/countries'),
-          axios.get('http://127.0.0.1:8080/data/visualize/cited_times'),
-          axios.get('http://127.0.0.1:8080/data/visualize/authors'),
-          axios.get('http://127.0.0.1:8080/data/visualize/publication_years'),
-          axios.get('http://127.0.0.1:8080/data/visualize/abstract'),
+          axios.get('https://flask-fire-qwreg2y2oq-uc.a.run.app/data/visualize/keywords'),
+          axios.get('https://flask-fire-qwreg2y2oq-uc.a.run.app/data/visualize/countries'),
+          axios.get('https://flask-fire-qwreg2y2oq-uc.a.run.app/data/visualize/cited_times'),
+          axios.get('https://flask-fire-qwreg2y2oq-uc.a.run.app/data/visualize/authors'),
+          axios.get('https://flask-fire-qwreg2y2oq-uc.a.run.app/data/visualize/publication_years'),
+          axios.get('https://flask-fire-qwreg2y2oq-uc.a.run.app/data/visualize/abstract'),
         ]);
 
         const chartData = {

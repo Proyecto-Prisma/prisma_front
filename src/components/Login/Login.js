@@ -77,7 +77,7 @@ export default function Login() {
     };
     try {
       const response = await axios.post(
-        "http://127.0.0.1:8080/auth/login",
+        "https://flask-fire-qwreg2y2oq-uc.a.run.app/auth/login",
         { email, password },
         config
       );
