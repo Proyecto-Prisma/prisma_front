@@ -62,6 +62,17 @@ const Graphs = () => {
     fontSizes: [40, 60],
   };
 
+  const customColorScale = [
+    "#FFEDA0",
+    "#FED976",
+    "#FEB24C",
+    "#FD8D3C",
+    "#FC4E2A",
+    "#E31A1C",
+    "#BD0026",
+    "#800026"
+  ];
+
   const data = [
     ['Country', 'Popularity'],
     ...chartData.countries.map((countryData) => [countryData.country, countryData.frequency]),
@@ -77,12 +88,22 @@ const Graphs = () => {
     const downloadNextChart = index => {
       if (index < charts.length) {
         const chart = charts[index];
-        html2canvas(chart, { scale: 4 }).then(canvas => {
-          const imgData = canvas.toDataURL('image/png');
-          pdf.addImage(imgData, 'PNG', 10, 10, 180, 100);
-          pdf.addPage();
-          downloadNextChart(index + 1);
-        });
+        const tempContainer = document.createElement('div'); // Crear un contenedor temporal
+        tempContainer.appendChild(chart.cloneNode(true)); // Clonar el contenido de la gráfica al contenedor temporal
+        document.body.appendChild(tempContainer); // Agregar el contenedor temporal al DOM para que sea renderizado y tenga dimensiones
+        html2canvas(tempContainer, { scale: 2 })
+          .then(canvas => {
+            const imgData = canvas.toDataURL('image/png');
+            pdf.addImage(imgData, 'PNG', 10, 10, 410, 120);
+            pdf.addPage();
+            document.body.removeChild(tempContainer); // Eliminar el contenedor temporal después de usarlo
+            downloadNextChart(index + 1);
+          })
+          .catch(error => {
+            console.error('Error al convertir gráfico a imagen:', error);
+            document.body.removeChild(tempContainer); // En caso de error, eliminar el contenedor temporal
+            downloadNextChart(index + 1);
+          });
       } else {
         pdf.save('charts.pdf');
       }
@@ -143,20 +164,20 @@ const Graphs = () => {
               width={450}
               height={400}
               data={chartData.keywords}
-              margin={{ bottom: 50, left: 50}}
+              margin={{ bottom: 70, left: 50}}
             >
               <Bar dataKey="frequency">
                 {chartData.keywords.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={generateRandomColor()} />
                 ))}
-                <LabelList dataKey="frequency" position="top" />
+                <LabelList dataKey="frequency" position="top" fontWeight="bold" />
               </Bar>
               <XAxis dataKey="keyword" angle={-45} textAnchor="end" interval={0} height={100} />
               <YAxis />
               <Tooltip />
             </BarChart>
           </Paper>
-          <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart1')}>
+          <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart1')} style={{ marginTop: '10px' }}>
             Descargar PNG
           </Button>
         </Grid>
@@ -167,7 +188,7 @@ const Graphs = () => {
             <Typography variant="h6" gutterBottom style={{ fontWeight: 'bold' }}>
               Keywords Frequency
             </Typography>
-            <RadarChart width={600} height={300} margin={{ bottom: 50, left: 50}} data={chartData.keywords}>
+            <RadarChart width={500} height={300} margin={{ top: 20, right: 200, bottom: 20, left: 20}} data={chartData.keywords}>
               <PolarGrid />
               <PolarAngleAxis dataKey="keyword" />
               <Radar
@@ -177,13 +198,14 @@ const Graphs = () => {
                 fillOpacity={0.6}
                 label={{
                   position: 'inside', 
-                  offset: 5, 
+                  offset: 5,
+                  fontWeight: "bold", 
                 }}
               />
               <Tooltip />
             </RadarChart>
           </Paper>
-          <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart2')}>
+          <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart2')} style={{ marginTop: '10px' }}>
             Descargar PNG
           </Button>
         </Grid>
@@ -201,7 +223,7 @@ const Graphs = () => {
                 cx="50%"
                 cy="50%"
                 outerRadius={80}
-                label
+                label={{fontWeight: "bold"}}
               >
                 {
                   chartData.keywords.map((entry, index) => (
@@ -213,7 +235,7 @@ const Graphs = () => {
               <Legend wrapperStyle={{ bottom: "-15px" }} />
             </PieChart>
           </Paper>
-          <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart3')}>
+          <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart3')} style={{ marginTop: '10px' }}>
             Descargar PNG
           </Button>
         </Grid>
@@ -251,7 +273,7 @@ const Graphs = () => {
             </Table>
           </TableContainer>
         </Paper>
-        <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart4')}>
+        <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart4')} style={{ marginTop: '10px' }}>
           Descargar PNG
         </Button>
       </Grid>
@@ -263,7 +285,7 @@ const Graphs = () => {
           </Typography>
           <BarChart width={400} height={400} data={chartData.citedTimes}>
             <Bar dataKey="cited_times" fill="#BA68C8">
-              <LabelList dataKey="cited_times" position="top" />
+              <LabelList dataKey="cited_times" position="top" fontWeight="bold" />
             </Bar>
             <XAxis dataKey="row_number" label={{ value: 'Article Index', position: 'insideBottom', dy: 10 }} />
             <YAxis label={{ value: 'Frequency', angle: -90, position: 'insideLeft' }} />
@@ -274,7 +296,7 @@ const Graphs = () => {
             />
           </BarChart>
         </Paper>
-        <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart5')}>
+        <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart5')} style={{ marginTop: '10px' }}>
           Descargar PNG
         </Button>
       </Grid>
@@ -293,7 +315,7 @@ const Graphs = () => {
               cy="50%"
               outerRadius={80}
               fill="#BA68C8"
-              label
+              label={{fontWeight: "bold"}}
             >
               {
                 chartData.citedTimes.map((entry, index) => (
@@ -305,7 +327,7 @@ const Graphs = () => {
             <Legend />
           </PieChart>
         </Paper>
-        <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart6')}>
+        <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart6')} style={{ marginTop: '10px' }}>
           Descargar PNG
         </Button>
       </Grid>
@@ -327,14 +349,14 @@ const Graphs = () => {
             <YAxis label={{ value: 'Frequency', angle: -90, position: 'insideLeft', style: { fontWeight: 'bold' } }}  />
             <Tooltip />
             <Bar dataKey="frequency" fill="#8884d8">
-              <LabelList dataKey="frequency" position="top" fill="#000" fontSize={12} />
+              <LabelList dataKey="frequency" position="top" fill="#000" fontSize={12} fontWeight="bold"/>
               {chartData.countries.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={generateRandomColor()} />
               ))}
             </Bar>
           </BarChart>
         </Paper>
-        <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart7')}>
+        <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart7')} style={{ marginTop: '10px' }}>
           Descargar PNG
         </Button>
       </Grid>
@@ -350,12 +372,12 @@ const Graphs = () => {
             <Tooltip />
             
             <Bar dataKey="frequency" fill="#FF7043">
-              <LabelList dataKey="frequency" position="top" />
+              <LabelList dataKey="frequency" position="top" fontWeight="bold" />
             </Bar>
           </BarChart>
           
         </Paper>
-        <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart8')}>
+        <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart8')} style={{ marginTop: '10px' }}>
           Descargar PNG
         </Button>
       </Grid>
@@ -370,10 +392,10 @@ const Graphs = () => {
               <YAxis label={{ value: 'Frequency', angle: -90, position: 'insideLeft', style: { fontWeight: 'bold' } }}  />
               <Tooltip />
               
-              <Line type="monotone" dataKey="frequency" stroke="#FF7043" label={{ position: 'top' }} />
+              <Line type="monotone" dataKey="frequency" stroke="#FF7043" label={{ position: 'top', fontWeight:"bold"}} />
             </LineChart>
           </Paper>
-          <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart9')}>
+          <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart9')} style={{ marginTop: '10px' }}>
             Descargar PNG
           </Button>
         </Grid>
@@ -395,7 +417,7 @@ const Graphs = () => {
               <ReactWordcloud words={chartData.abstract} options={options} />
             </div>
           </Paper>
-          <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart10')}>
+          <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart10')} style={{ marginTop: '10px' }}>
             Descargar PNG
           </Button>
         </Grid>
@@ -421,7 +443,7 @@ const Graphs = () => {
                 cx="50%"
                 cy="50%"
                 outerRadius={80}
-                label
+                label={{fontWeight: "bold"}}
               >
                 {chartData.countries.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={generateRandomColor()} />
@@ -431,7 +453,7 @@ const Graphs = () => {
               <Legend />
             </PieChart>
           </Paper>
-          <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart11')}>
+          <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart11')} style={{ marginTop: '10px' }}>
             Descargar PNG
           </Button>
         </Grid>
@@ -460,9 +482,12 @@ const Graphs = () => {
             width="100%"
             height="400px"
             data={data}
+            options={{
+              colorAxis: { colors: customColorScale },
+            }}
           />
           </Paper>
-          <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart12')}>
+          <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart12')} style={{ marginTop: '10px' }}>
             Descargar PNG
           </Button>
         </Grid>
@@ -495,7 +520,7 @@ const Graphs = () => {
               </Table>
             </TableContainer>
           </Paper>
-          <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart13')}>
+          <Button variant="outlined" color="primary" onClick={() => downloadChartAsPNG('chart13')} style={{ marginTop: '10px' }}>
             Descargar PNG
           </Button>
         </Grid>
