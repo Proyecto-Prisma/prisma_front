@@ -34,6 +34,10 @@ const theme = createTheme({
 });
 
 const Home = () => {
+  const [searchString, setSearchString] = React.useState('');
+  const [inicio, setInicio] = React.useState('');
+  const [fin, setFin] = React.useState('');
+
   return (
     <ThemeProvider theme={theme}>
       <Box mt={4}>
@@ -55,30 +59,34 @@ const Home = () => {
               label="Cadena de búsqueda"
               placeholder="Cadena de búsqueda"
               variant="outlined"
+              value={searchString}
+              onChange={(e) => setSearchString(e.target.value)}
             />
           </Grid>
           <Grid item xs={12} md={3}>
             <TextField
               fullWidth
-              type="number"
               label="Año de Inicio"
               placeholder="YYYY"
               variant="outlined"
+              value={inicio}
+              onChange={(e) => setInicio(e.target.value)}
             />
           </Grid>
           <Grid item xs={12} md={3}>
             <TextField
               fullWidth
-              type="number"
               label="Año de Fin"
               placeholder="YYYY"
               variant="outlined"
+              value={fin}
+              onChange={(e) => setFin(e.target.value)}
             />
           </Grid>
         </Grid>
 
         <Box>
-          <FileUpload />
+          <FileUpload searchString={searchString} inicio={inicio} fin={fin}/>
         </Box>
       </Box>
     </ThemeProvider>

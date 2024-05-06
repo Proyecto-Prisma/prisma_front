@@ -24,7 +24,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Home from "../Home/Home";
 import Graphs from "../Graphs/Graps";
 import History from "../History/History";
-
+import profilePhoto from "../../assets/profile.png"
 const drawerWidth = 240;
 const pink = "#FF005B";
 const darkPink = "#C0005E";
@@ -128,7 +128,7 @@ export default function DashBar() {
           <div style={{ flexGrow: 1 }} />
           <Avatar
             alt="User Avatar"
-            src="/path/to/avatar-image.jpg"
+            src={profilePhoto}
             sx={{ cursor: "pointer" }}
             onClick={handleAvatarClick}
             style={{ backgroundColor: darkPink }}
@@ -179,7 +179,6 @@ export default function DashBar() {
               <ListItemButton>
                 <ListItemIcon sx={{ color: pink }}>
                   {" "}
-                  {/* Asegúrate de usar un valor válido para pink */}
                   {index % 3 === 0 ? (
                     <ArticleIcon />
                   ) : index % 3 === 1 ? (
