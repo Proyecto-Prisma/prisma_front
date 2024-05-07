@@ -24,7 +24,8 @@ import MenuItem from "@mui/material/MenuItem";
 import Home from "../Home/Home";
 import Graphs from "../Graphs/Graps";
 import History from "../History/History";
-import profilePhoto from "../../assets/profile.png"
+import profilePhoto from "../../assets/profile.png";
+import { useNavigate } from "react-router-dom";
 const drawerWidth = 240;
 const pink = "#FF005B";
 const darkPink = "#C0005E";
@@ -79,6 +80,7 @@ export default function DashBar() {
   const [open, setOpen] = React.useState(false);
   const [selectedItem, setSelectedItem] = React.useState("SLR");
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const navigate = useNavigate();
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -103,9 +105,11 @@ export default function DashBar() {
   const handleProfileClick = () => {
     handleAvatarClose();
   };
-
+  
   const handleLogoutClick = () => {
+    localStorage.removeItem("authData");
     handleAvatarClose();
+    navigate("/login");
   };
 
   return (
