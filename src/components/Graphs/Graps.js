@@ -47,12 +47,24 @@ const Graphs = () => {
     const fetchData = async () => {
       try {
         const responses = await Promise.all([
-          axios.get("https://flask-fire-qwreg2y2oq-uc.a.run.app/data/visualize/keywords"),
-          axios.get("https://flask-fire-qwreg2y2oq-uc.a.run.app/data/visualize/countries"),
-          axios.get("https://flask-fire-qwreg2y2oq-uc.a.run.app/data/visualize/cited_times"),
-          axios.get("https://flask-fire-qwreg2y2oq-uc.a.run.app/data/visualize/authors"),
-          axios.get("https://flask-fire-qwreg2y2oq-uc.a.run.app/data/visualize/publication_years"),
-          axios.get("https://flask-fire-qwreg2y2oq-uc.a.run.app/data/visualize/abstract"),
+          axios.get(
+            "https://flask-fire-qwreg2y2oq-uc.a.run.app/data/visualize/keywords"
+          ),
+          axios.get(
+            "https://flask-fire-qwreg2y2oq-uc.a.run.app/data/visualize/countries"
+          ),
+          axios.get(
+            "https://flask-fire-qwreg2y2oq-uc.a.run.app/data/visualize/cited_times"
+          ),
+          axios.get(
+            "https://flask-fire-qwreg2y2oq-uc.a.run.app/data/visualize/authors"
+          ),
+          axios.get(
+            "https://flask-fire-qwreg2y2oq-uc.a.run.app/data/visualize/publication_years"
+          ),
+          axios.get(
+            "https://flask-fire-qwreg2y2oq-uc.a.run.app/data/visualize/abstract"
+          ),
         ]);
 
         const chartData = {
@@ -84,8 +96,6 @@ const Graphs = () => {
     fontSizes: [40, 60],
   };
 
-
-
   const data = [
     ["Country", "Popularity"],
     ...chartData.countries.map((countryData) => [
@@ -111,19 +121,19 @@ const Graphs = () => {
     const downloadNextChart = (index) => {
       if (index < charts.length) {
         const chart = charts[index];
-        const tempContainer = document.createElement('div'); // Crear un contenedor temporal
+        const tempContainer = document.createElement("div"); // Crear un contenedor temporal
         tempContainer.appendChild(chart.cloneNode(true)); // Clonar el contenido de la gráfica al contenedor temporal
         document.body.appendChild(tempContainer); // Agregar el contenedor temporal al DOM para que sea renderizado y tenga dimensiones
         html2canvas(tempContainer, { scale: 2 })
-          .then(canvas => {
-            const imgData = canvas.toDataURL('image/png');
-            pdf.addImage(imgData, 'PNG', 10, 10, 410, 120);
+          .then((canvas) => {
+            const imgData = canvas.toDataURL("image/png");
+            pdf.addImage(imgData, "PNG", 10, 10, 410, 120);
             pdf.addPage();
             document.body.removeChild(tempContainer); // Eliminar el contenedor temporal después de usarlo
             downloadNextChart(index + 1);
           })
-          .catch(error => {
-            console.error('Error al convertir gráfico a imagen:', error);
+          .catch((error) => {
+            console.error("Error al convertir gráfico a imagen:", error);
             document.body.removeChild(tempContainer); // En caso de error, eliminar el contenedor temporal
             downloadNextChart(index + 1);
             setIsLoading(false); // Desactivar el loader en caso de error
@@ -148,6 +158,17 @@ const Graphs = () => {
   };
 
   const [isLoading, setIsLoading] = useState(false);
+
+  const customColorScale = [
+    "#FFEDA0",
+    "#FED976",
+    "#FEB24C",
+    "#FD8D3C",
+    "#FC4E2A",
+    "#E31A1C",
+    "#BD0026",
+    "#800026"
+  ];
 
   return (
     <Box mt={4} mx={4}>
@@ -221,7 +242,11 @@ const Graphs = () => {
                 {chartData.keywords.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={generateRandomColor()} />
                 ))}
-                <LabelList dataKey="frequency" position="top" fontWeight="bold" />
+                <LabelList
+                  dataKey="frequency"
+                  position="top"
+                  fontWeight="bold"
+                />
               </Bar>
               <XAxis
                 dataKey="keyword"
@@ -286,9 +311,9 @@ const Graphs = () => {
                 fill="#F06292"
                 fillOpacity={0.6}
                 label={{
-                  position: 'inside', 
+                  position: "inside",
                   offset: 5,
-                  fontWeight: "bold", 
+                  fontWeight: "bold",
                 }}
               />
               <Tooltip />
@@ -346,7 +371,7 @@ const Graphs = () => {
                 cx="50%"
                 cy="50%"
                 outerRadius={80}
-                label={{fontWeight: "bold"}}
+                label={{ fontWeight: "bold" }}
               >
                 {chartData.keywords.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={generateRandomColor()} />
@@ -466,7 +491,6 @@ const Graphs = () => {
                 bottom: 50,
               }}
               data={chartData.citedTimes}
-
             >
               <Bar dataKey="cited_times" fill="#BA68C8">
                 <LabelList dataKey="cited_times" position="top" />
@@ -886,7 +910,7 @@ const Graphs = () => {
                 cx="50%"
                 cy="50%"
                 outerRadius={80}
-                label={{fontWeight: "bold"}}
+                label={{ fontWeight: "bold" }}
               >
                 {chartData.countries.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={generateRandomColor()} />
@@ -948,6 +972,9 @@ const Graphs = () => {
               width="100%"
               height="400px"
               data={data}
+              options={{
+                colorAxis: { colors: customColorScale },
+              }}
             />
           </Paper>
           <Box mt={3} textAlign={"end"}>
