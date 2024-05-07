@@ -11,6 +11,9 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { GoogleAuthProvider, getAuth, signInWithPopup } from "firebase/auth";
+import { initializeApp } from "firebase/app";
+import { app } from "./../../firebaseConfig";
 
 // Crear un tema personalizado
 const theme = createTheme({
@@ -57,37 +60,21 @@ function Copyright(props) {
   );
 }
 
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+
 export default function SignUp() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const pink = "#FF005B";
-  const darkPink = "#C0005E";
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    const config = {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    };
-    if (password !== confirmPassword) {
-      toast.error("Passwords do not match!");
-      return;
-    }
-
+  const handleGoogleSignIn = async () => {
     try {
-      await axios.post("http://127.0.0.1:8080/auth/signup", {
-        email,
-        password,
-        config
+      const result = await signInWithPopup(auth, provider);
+      const idToken = await result.user.getIdToken();
+      await axios.post("https://flask-fire-qwreg2y2oq-uc.a.run.app/auth/login", {
+        id_token: idToken,
       });
       toast.success("Registration successful! Please login.");
       // Redirect to login page or other action
     } catch (error) {
-      toast.error(
-        error.response?.data?.error || "An error occurred during signup."
-      );
+      toast.error(error.message || "An error occurred during signup.");
     }
   };
 
@@ -113,74 +100,28 @@ export default function SignUp() {
           <Typography component="h1" variant="h5">
             Regístrate en PRISMA
           </Typography>
-          <Box
-            component="form"
-            onSubmit={handleSubmit}
-            noValidate
-            sx={{ mt: 3 }}
+          <Button
+            onClick={handleGoogleSignIn}
+            fullWidth
+            variant="contained"
+            sx={{
+              mt: 3,
+              mb: 2,
+              backgroundColor: "#FF005B",
+              "&:hover": {
+                backgroundColor: "#C0005E",
+              },
+            }}
           >
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <TextField
-                  required
-                  fullWidth
-                  id="email"
-                  label="Correo institucional"
-                  name="email"
-                  autoComplete="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  required
-                  fullWidth
-                  name="password"
-                  label="Contraseña"
-                  type="password"
-                  id="password"
-                  autoComplete="new-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  required
-                  fullWidth
-                  name="confirmPassword"
-                  label="Confirmar contraseña"
-                  type="password"
-                  id="confirmPassword"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                />
-              </Grid>
+            Regístrate con Google
+          </Button>
+          <Grid container justifyContent="flex-end">
+            <Grid item>
+              <Link href="/login" variant="body2">
+                ¿Ya tienes cuenta? Inicia sesión
+              </Link>
             </Grid>
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{
-                mt: 3,
-                mb: 2,
-                backgroundColor: pink, // Change to the desired color
-                "&:hover": {
-                  backgroundColor: darkPink, // Change to the desired hover color
-                },
-              }}
-            >
-              Regístrate
-            </Button>
-            <Grid container justifyContent="flex-end">
-              <Grid item>
-                <Link href="/login" variant="body2">
-                  ¿Ya tienes cuenta? Inicia sesión
-                </Link>
-              </Grid>
-            </Grid>
-          </Box>
+          </Grid>
         </Box>
         <Copyright sx={{ mt: 8, mb: 4 }} />
         <ToastContainer position="top-center" />

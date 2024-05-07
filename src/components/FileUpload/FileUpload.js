@@ -77,7 +77,7 @@ const FileUpload = ({ searchString, inicio, fin }) => {
 
     try {
       const response = await axios.post(
-        "http://127.0.0.1:8080/data/upload",
+        "https://flask-fire-qwreg2y2oq-uc.a.run.app/data/upload",
         formData,
         {
           headers: {
@@ -96,7 +96,7 @@ const FileUpload = ({ searchString, inicio, fin }) => {
       }
 
       // After successful upload, call the /process endpoint
-      await axios.get("http://127.0.0.1:8080/data/process");
+      await axios.get("https://flask-fire-qwreg2y2oq-uc.a.run.app/data/process");
       setDataProcessed(true); // Enable the Export Data button
       toast.success("Archivos procesados con éxito. Listo para exportar.");
     } catch (error) {
@@ -114,7 +114,7 @@ const FileUpload = ({ searchString, inicio, fin }) => {
       const formData = new FormData();
       formData.append("folder_id", localStorage.getItem("upload_key"));
       const response = await axios.post(
-        "http://127.0.0.1:8080/data/export",
+        "https://flask-fire-qwreg2y2oq-uc.a.run.app/data/export",
         formData,
         {
           headers: {

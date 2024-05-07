@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";  // Import useContext if you're using context
-import  AuthContext  from '../../AuthContext.js'; 
+import  AuthContext  from '../../AuthContext.js';
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -15,6 +15,8 @@ import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom"; // Updated import
+import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { app } from "./../../firebaseConfig";
 
 // Crear un tema personalizado
 const theme = createTheme({
@@ -62,33 +64,26 @@ function Copyright(props) {
 const pink = "#FF005B";
 const darkPink = "#C0005E";
 
-export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const navigate = useNavigate(); // Updated to useNavigate
-  const { setAuthData } = useContext(AuthContext); // Assuming you manage auth state in context
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    };
+export default function Login() {
+  const navigate = useNavigate();
+  const { setAuthData } = useContext(AuthContext);
+
+  const handleGoogleSignIn = async () => {
     try {
-      const response = await axios.post(
-        "http://127.0.0.1:8080/auth/login",
-        { email, password },
-        config
-      );
-      const { token, uid } = response.data; // Get UID from response
-      console.log(response)
-      setAuthData({ token, uid }); // Store token and UID in context or another state management
-      console.log("UID:", uid);
+      const result = await signInWithPopup(auth, provider);
+      const idToken = await result.user.getIdToken();
+      const response = await axios.post("https://flask-fire-qwreg2y2oq-uc.a.run.app/auth/login", {
+        id_token: idToken,
+      });
+      const { uid } = response.data;
+      setAuthData({ token: idToken, uid });
       toast.success("Login successful");
-      navigate("/prisma"); // Navigate to a protected route
+      navigate("/prisma");
     } catch (error) {
-      toast.error(error.response?.data?.error || "An error occurred.");
+      toast.error(error.message || "An error occurred.");
     }
   };
 
@@ -114,68 +109,28 @@ export default function Login() {
           <Typography component="h1" variant="h5">
             Bienvenido, inicia sesión
           </Typography>
-          <Box
-            component="form"
-            onSubmit={handleSubmit}
-            noValidate
-            sx={{ mt: 1 }}
+          <Button
+            onClick={handleGoogleSignIn}
+            fullWidth
+            variant="contained"
+            sx={{
+              mt: 3,
+              mb: 2,
+              backgroundColor: "#FF005B",
+              "&:hover": {
+                backgroundColor: "#C0005E",
+              },
+            }}
           >
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label="Correo institucional"
-              name="email"
-              autoComplete="email"
-              autoFocus
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Contraseña"
-              type="password"
-              id="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
-              label="Recuérdame"
-            />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{
-                mt: 3,
-                mb: 2,
-                backgroundColor: pink,
-                "&:hover": {
-                  backgroundColor: darkPink,
-                },
-              }}
-            >
-              Iniciar sesión
-            </Button>
-            <Grid container>
-              <Grid item xs>
-                <Link href="#" variant="body2" sx={{ color: darkPink }}>
-                  ¿Olvidaste tu contraseña?
-                </Link>
-              </Grid>
-              <Grid item>
-                <Link href="/signup" variant="body2" sx={{ color: darkPink }}>
-                  {"¿No tienes cuenta? Regístrate"}
-                </Link>
-              </Grid>
+            Iniciar sesión con Google
+          </Button>
+          <Grid container>
+            <Grid item>
+              <Link href="/signup" variant="body2" sx={{ color: "#C0005E" }}>
+                {"¿No tienes cuenta? Regístrate"}
+              </Link>
             </Grid>
-          </Box>
+          </Grid>
         </Box>
         <Copyright sx={{ mt: 8, mb: 4 }} />
         <ToastContainer position="top-center" />
