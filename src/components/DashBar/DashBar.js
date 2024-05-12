@@ -101,10 +101,6 @@ export default function DashBar() {
   const handleAvatarClose = () => {
     setAnchorEl(null);
   };
-
-  const handleProfileClick = () => {
-    handleAvatarClose();
-  };
   
   const handleLogoutClick = () => {
     localStorage.removeItem("authData");
@@ -144,7 +140,6 @@ export default function DashBar() {
             anchorOrigin={{ vertical: "top", horizontal: "right" }}
             transformOrigin={{ vertical: "top", horizontal: "right" }}
           >
-            <MenuItem onClick={handleProfileClick}>Perfil</MenuItem>
             <MenuItem onClick={handleLogoutClick}>Cerrar Sesión</MenuItem>
           </Menu>
         </Toolbar>
