@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Box, Button, Grid, Paper, Typography } from "@mui/material";
+import { Box, Button, Grid, Paper, Typography, Slider  } from "@mui/material";
 import {
   BarChart,
   Bar,
@@ -47,12 +47,24 @@ const Graphs = () => {
     const fetchData = async () => {
       try {
         const responses = await Promise.all([
-          axios.get("https://flask-fire-qwreg2y2oq-uc.a.run.app/data/visualize/keywords"),
-          axios.get("https://flask-fire-qwreg2y2oq-uc.a.run.app/data/visualize/countries"),
-          axios.get("https://flask-fire-qwreg2y2oq-uc.a.run.app/data/visualize/cited_times"),
-          axios.get("https://flask-fire-qwreg2y2oq-uc.a.run.app/data/visualize/authors"),
-          axios.get("https://flask-fire-qwreg2y2oq-uc.a.run.app/data/visualize/publication_years"),
-          axios.get("https://flask-fire-qwreg2y2oq-uc.a.run.app/data/visualize/abstract"),
+          axios.get(
+            "https://flask-fire-qwreg2y2oq-uc.a.run.app/data/visualize/keywords"
+          ),
+          axios.get(
+            "https://flask-fire-qwreg2y2oq-uc.a.run.app/data/visualize/countries"
+          ),
+          axios.get(
+            "https://flask-fire-qwreg2y2oq-uc.a.run.app/data/visualize/cited_times"
+          ),
+          axios.get(
+            "https://flask-fire-qwreg2y2oq-uc.a.run.app/data/visualize/authors"
+          ),
+          axios.get(
+            "https://flask-fire-qwreg2y2oq-uc.a.run.app/data/visualize/publication_years"
+          ),
+          axios.get(
+            "https://flask-fire-qwreg2y2oq-uc.a.run.app/data/visualize/abstract"
+          ),
         ]);
 
         const chartData = {
@@ -66,6 +78,7 @@ const Graphs = () => {
 
         setChartData(chartData);
         console.log("Datos recibidos para países:", chartData.countries);
+        console.log("Datos recibidos para abstract:", chartData.abstract);
       } catch (error) {
         console.error("Error fetching chart data:", error);
       }
@@ -78,22 +91,20 @@ const Graphs = () => {
     return "#" + Math.floor(Math.random() * 16777215).toString(16);
   };
 
+  const [maxWordCount, setMaxWordCount] = useState(20);
+
+  // Actualizar el máximo del slider cuando se actualice chartData.abstract
+  useEffect(() => {
+    if (chartData && chartData.abstract) {
+      setMaxWordCount(chartData.abstract.length);
+    }
+  }, [chartData]);
+
   const options = {
     rotations: 0,
     rotationAngles: [0],
     fontSizes: [40, 60],
   };
-
-  const customColorScale = [
-    "#FFEDA0",
-    "#FED976",
-    "#FEB24C",
-    "#FD8D3C",
-    "#FC4E2A",
-    "#E31A1C",
-    "#BD0026",
-    "#800026"
-  ];
 
   const data = [
     ["Country", "Popularity"],
@@ -102,6 +113,10 @@ const Graphs = () => {
       countryData.frequency,
     ]),
   ];
+
+  const [wordCount, setWordCount] = useState(20);
+
+  const colors_bar = ['#BA68C8', '#FF9800', '#4CAF50', '#2196F3', '#FFC107', '#9C27B0', '#FF5722', '#8BC34A', '#03A9F4', '#FFEB3B'];
 
   const COLORS = [
     "#0088FE",
@@ -120,19 +135,19 @@ const Graphs = () => {
     const downloadNextChart = (index) => {
       if (index < charts.length) {
         const chart = charts[index];
-        const tempContainer = document.createElement('div'); // Crear un contenedor temporal
+        const tempContainer = document.createElement("div"); // Crear un contenedor temporal
         tempContainer.appendChild(chart.cloneNode(true)); // Clonar el contenido de la gráfica al contenedor temporal
         document.body.appendChild(tempContainer); // Agregar el contenedor temporal al DOM para que sea renderizado y tenga dimensiones
         html2canvas(tempContainer, { scale: 2 })
-          .then(canvas => {
-            const imgData = canvas.toDataURL('image/png');
-            pdf.addImage(imgData, 'PNG', 10, 10, 410, 120);
+          .then((canvas) => {
+            const imgData = canvas.toDataURL("image/png");
+            pdf.addImage(imgData, "PNG", 10, 10, 410, 120);
             pdf.addPage();
             document.body.removeChild(tempContainer); // Eliminar el contenedor temporal después de usarlo
             downloadNextChart(index + 1);
           })
-          .catch(error => {
-            console.error('Error al convertir gráfico a imagen:', error);
+          .catch((error) => {
+            console.error("Error al convertir gráfico a imagen:", error);
             document.body.removeChild(tempContainer); // En caso de error, eliminar el contenedor temporal
             downloadNextChart(index + 1);
             setIsLoading(false); // Desactivar el loader en caso de error
@@ -157,6 +172,17 @@ const Graphs = () => {
   };
 
   const [isLoading, setIsLoading] = useState(false);
+
+  const customColorScale = [
+    "#FFEDA0",
+    "#FED976",
+    "#FEB24C",
+    "#FD8D3C",
+    "#FC4E2A",
+    "#E31A1C",
+    "#BD0026",
+    "#800026"
+  ];
 
   return (
     <Box mt={4} mx={4}>
@@ -230,7 +256,12 @@ const Graphs = () => {
                 {chartData.keywords.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={generateRandomColor()} />
                 ))}
-                <LabelList dataKey="frequency" position="top" fontWeight="bold" />
+                <LabelList
+                  dataKey="frequency"
+                  position="top"
+                  fontWeight="bold"
+                  
+                />
               </Bar>
               <XAxis
                 dataKey="keyword"
@@ -295,9 +326,9 @@ const Graphs = () => {
                 fill="#F06292"
                 fillOpacity={0.6}
                 label={{
-                  position: 'inside', 
+                  position: "inside",
                   offset: 5,
-                  fontWeight: "bold", 
+                  fontWeight: "bold",
                 }}
               />
               <Tooltip />
@@ -355,7 +386,7 @@ const Graphs = () => {
                 cx="50%"
                 cy="50%"
                 outerRadius={80}
-                label={{fontWeight: "bold"}}
+                label={{ fontWeight: "bold" }}
               >
                 {chartData.keywords.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={generateRandomColor()} />
@@ -475,9 +506,11 @@ const Graphs = () => {
                 bottom: 50,
               }}
               data={chartData.citedTimes}
-
             >
-              <Bar dataKey="cited_times" fill="#BA68C8">
+              <Bar dataKey="cited_times">
+                {chartData.citedTimes.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={colors_bar[index % colors_bar.length]} />
+                ))}
                 <LabelList dataKey="cited_times" position="top" />
               </Bar>
               <XAxis
@@ -556,7 +589,7 @@ const Graphs = () => {
                 cy="50%"
                 outerRadius={80}
                 fill="#BA68C8"
-                label
+                label = {{fontWeight: "bold"}}
               >
                 {chartData.citedTimes.map((entry, index) => (
                   <Cell
@@ -622,6 +655,7 @@ const Graphs = () => {
                 top: 10,
                 bottom: 50,
               }}
+              label={{ fontWeight: "bold" }}
               data={chartData.publicationYears}
             >
               <XAxis
@@ -681,7 +715,7 @@ const Graphs = () => {
               gutterBottom
               style={{ fontWeight: "bold" }}
             >
-              Publication Years (Line Chart)
+              Publication Years (Line Chart)  
             </Typography>
             <LineChart
               width={900}
@@ -716,7 +750,7 @@ const Graphs = () => {
                 type="monotone"
                 dataKey="frequency"
                 stroke="#FF7043"
-                label={{ position: "top" }}
+                label={{ position: "top", fontWeight: "bold"}}
               />
             </LineChart>
           </Paper>
@@ -745,25 +779,29 @@ const Graphs = () => {
       <Typography variant="h4" mt={4} mb={2} sx={{ fontWeight: 600 }}>
         Abstract
       </Typography>
-
       <Grid container spacing={3} justifyContent={"center"}>
         <Grid item xs={12} sm={12} md={9}>
-          <Paper
-            elevation={3}
-            style={{ borderRadius: "1rem", padding: "4rem" }}
-            id="chart10"
-            className="graph-container"
-          >
-            <Typography
-              variant="h6"
-              gutterBottom
-              style={{ fontWeight: "bold" }}
-            >
+          <Paper elevation={3} style={{ borderRadius: "1rem", padding: "4rem" }} id="chart10" className="graph-container">
+            <Typography variant="h6" gutterBottom style={{ fontWeight: "bold" }}>
               Abstract Wordcloud
             </Typography>
             <div style={{ height: 400 }}>
-              <ReactWordcloud words={chartData.abstract} options={options} />
+              <ReactWordcloud words={chartData.abstract.slice(0, wordCount)} options={options} />
             </div>
+            <Box mt={3}>
+              <Typography variant="body1" gutterBottom style={{ fontWeight: "bold" }}>
+                Cantidad de palabras: {wordCount}
+              </Typography>
+              {/* Slider para ajustar el recuento de palabras */}
+              <Slider
+                value={wordCount}
+                onChange={(e, newValue) => setWordCount(newValue)}
+                min={5}
+                max={maxWordCount}
+                step={5}
+                aria-labelledby="continuous-slider"
+              />
+            </Box>
           </Paper>
           <Box mt={3} textAlign={"end"}>
             <Button
@@ -786,6 +824,7 @@ const Graphs = () => {
           </Box>
         </Grid>
       </Grid>
+
 
       <Typography variant="h4" mt={4} mb={2} sx={{ fontWeight: 600 }}>
         Geographic Distribution
@@ -838,6 +877,7 @@ const Graphs = () => {
                   position="top"
                   fill="#000"
                   fontSize={12}
+                  fontWeight={"bold"}
                 />
                 {chartData.countries.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={generateRandomColor()} />
@@ -895,7 +935,7 @@ const Graphs = () => {
                 cx="50%"
                 cy="50%"
                 outerRadius={80}
-                label={{fontWeight: "bold"}}
+                label={{ fontWeight: "bold" }}
               >
                 {chartData.countries.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={generateRandomColor()} />
@@ -957,6 +997,9 @@ const Graphs = () => {
               width="100%"
               height="400px"
               data={data}
+              options={{
+                colorAxis: { colors: customColorScale },
+              }}
             />
           </Paper>
           <Box mt={3} textAlign={"end"}>

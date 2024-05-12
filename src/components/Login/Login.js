@@ -1,13 +1,10 @@
-import React, { useState, useContext } from "react";  // Import useContext if you're using context
+import React, {  useContext } from "react";  // Import useContext if you're using context
 import  AuthContext  from '../../AuthContext.js';
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
-import TextField from "@mui/material/TextField";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
 import Link from "@mui/material/Link";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
@@ -61,8 +58,6 @@ function Copyright(props) {
     </Typography>
   );
 }
-const pink = "#FF005B";
-const darkPink = "#C0005E";
 
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
