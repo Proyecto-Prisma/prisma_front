@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Box, Button, Grid, Paper, Typography, Slider  } from "@mui/material";
+import { Box, Button, Grid, Paper, Typography, Slider } from "@mui/material";
 import {
   BarChart,
   Bar,
@@ -116,7 +116,18 @@ const Graphs = () => {
 
   const [wordCount, setWordCount] = useState(20);
 
-  const colors_bar = ['#BA68C8', '#FF9800', '#4CAF50', '#2196F3', '#FFC107', '#9C27B0', '#FF5722', '#8BC34A', '#03A9F4', '#FFEB3B'];
+  const colors_bar = [
+    "#BA68C8",
+    "#FF9800",
+    "#4CAF50",
+    "#2196F3",
+    "#FFC107",
+    "#9C27B0",
+    "#FF5722",
+    "#8BC34A",
+    "#03A9F4",
+    "#FFEB3B",
+  ];
 
   const COLORS = [
     "#0088FE",
@@ -130,7 +141,7 @@ const Graphs = () => {
   const downloadChartsAsPDF = () => {
     setIsLoading(true); // Activar el loader
     const charts = document.querySelectorAll(".graph-container");
-    const pdf = new jsPDF();
+    const pdf = new jsPDF("landscape"); // Cambiar orientación a paisaje para mejor ajuste
 
     const downloadNextChart = (index) => {
       if (index < charts.length) {
@@ -138,24 +149,17 @@ const Graphs = () => {
         const tempContainer = document.createElement("div"); // Crear un contenedor temporal
         tempContainer.appendChild(chart.cloneNode(true)); // Clonar el contenido de la gráfica al contenedor temporal
         document.body.appendChild(tempContainer); // Agregar el contenedor temporal al DOM para que sea renderizado y tenga dimensiones
-  
-        html2canvas(tempContainer, { scale: 2 })
+
+        html2canvas(tempContainer, { scale: 2, logging: true, useCORS: true })
           .then((canvas) => {
             const imgData = canvas.toDataURL("image/png");
-            let width = 410; // Ancho por defecto
-            let height = 120; // Alto por defecto
-            
-            // Ajustar el tamaño solo para la nube de palabras y el mapa
-            if (chart.id === "chart10") {
-              width = 350; // Ancho reducido para la nube de palabras
-              height = 180; // Alto reducido para la nube de palabras
-            } else if (chart.id === "chart12") {
-              width = 380; // Ancho reducido para el mapa
-              height = 150; // Alto reducido para el mapa
+            let imgWidth = 280; // Ancho ajustado para orientación paisaje
+            let imgHeight = (canvas.height * imgWidth) / canvas.width; // Ajustar alto para mantener la proporción
+
+            if (index > 0) {
+              pdf.addPage();
             }
-            
-            pdf.addImage(imgData, "PNG", 10, 10, width, height);
-            pdf.addPage();
+            pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
             document.body.removeChild(tempContainer); // Eliminar el contenedor temporal después de usarlo
             downloadNextChart(index + 1);
           })
@@ -194,7 +198,7 @@ const Graphs = () => {
     "#FC4E2A",
     "#E31A1C",
     "#BD0026",
-    "#800026"
+    "#800026",
   ];
 
   return (
@@ -273,7 +277,6 @@ const Graphs = () => {
                   dataKey="frequency"
                   position="top"
                   fontWeight="bold"
-                  
                 />
               </Bar>
               <XAxis
@@ -522,7 +525,10 @@ const Graphs = () => {
             >
               <Bar dataKey="cited_times">
                 {chartData.citedTimes.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={colors_bar[index % colors_bar.length]} />
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={colors_bar[index % colors_bar.length]}
+                  />
                 ))}
                 <LabelList dataKey="cited_times" position="top" />
               </Bar>
@@ -602,7 +608,7 @@ const Graphs = () => {
                 cy="50%"
                 outerRadius={80}
                 fill="#BA68C8"
-                label = {{fontWeight: "bold"}}
+                label={{ fontWeight: "bold" }}
               >
                 {chartData.citedTimes.map((entry, index) => (
                   <Cell
@@ -728,7 +734,7 @@ const Graphs = () => {
               gutterBottom
               style={{ fontWeight: "bold" }}
             >
-              Publication Years (Line Chart)  
+              Publication Years (Line Chart)
             </Typography>
             <LineChart
               width={900}
@@ -763,7 +769,7 @@ const Graphs = () => {
                 type="monotone"
                 dataKey="frequency"
                 stroke="#FF7043"
-                label={{ position: "top", fontWeight: "bold"}}
+                label={{ position: "top", fontWeight: "bold" }}
               />
             </LineChart>
           </Paper>
@@ -794,15 +800,31 @@ const Graphs = () => {
       </Typography>
       <Grid container spacing={3} justifyContent={"center"}>
         <Grid item xs={12} sm={12} md={9}>
-          <Paper elevation={3} style={{ borderRadius: "1rem", padding: "4rem" }} id="chart10" className="graph-container">
-            <Typography variant="h6" gutterBottom style={{ fontWeight: "bold" }}>
+          <Paper
+            elevation={3}
+            style={{ borderRadius: "1rem", padding: "4rem" }}
+            id="chart10"
+            className="graph-container"
+          >
+            <Typography
+              variant="h6"
+              gutterBottom
+              style={{ fontWeight: "bold" }}
+            >
               Abstract Wordcloud
             </Typography>
             <div style={{ height: 400 }}>
-              <ReactWordcloud words={chartData.abstract.slice(0, wordCount)} options={options} />
+              <ReactWordcloud
+                words={chartData.abstract.slice(0, wordCount)}
+                options={options}
+              />
             </div>
             <Box mt={3}>
-              <Typography variant="body1" gutterBottom style={{ fontWeight: "bold" }}>
+              <Typography
+                variant="body1"
+                gutterBottom
+                style={{ fontWeight: "bold" }}
+              >
                 Cantidad de palabras: {wordCount}
               </Typography>
               {/* Slider para ajustar el recuento de palabras */}
@@ -813,6 +835,7 @@ const Graphs = () => {
                 max={maxWordCount}
                 step={5}
                 aria-labelledby="continuous-slider"
+                sx={{ color: "#FF005B" }}
               />
             </Box>
           </Paper>
@@ -837,7 +860,6 @@ const Graphs = () => {
           </Box>
         </Grid>
       </Grid>
-
 
       <Typography variant="h4" mt={4} mb={2} sx={{ fontWeight: 600 }}>
         Geographic Distribution

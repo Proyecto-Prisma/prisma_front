@@ -117,7 +117,7 @@ const History = () => {
     <Grid container spacing={2}>
       {loading ? (
         <Grid item xs={12} style={{ textAlign: "center" }}>
-          <CircularProgress />
+          <CircularProgress sx={{color: pink}}/>
         </Grid>
       ) : (
         historyItems.map((item) => (
