@@ -138,10 +138,23 @@ const Graphs = () => {
         const tempContainer = document.createElement("div"); // Crear un contenedor temporal
         tempContainer.appendChild(chart.cloneNode(true)); // Clonar el contenido de la gráfica al contenedor temporal
         document.body.appendChild(tempContainer); // Agregar el contenedor temporal al DOM para que sea renderizado y tenga dimensiones
+  
         html2canvas(tempContainer, { scale: 2 })
           .then((canvas) => {
             const imgData = canvas.toDataURL("image/png");
-            pdf.addImage(imgData, "PNG", 10, 10, 410, 120);
+            let width = 410; // Ancho por defecto
+            let height = 120; // Alto por defecto
+            
+            // Ajustar el tamaño solo para la nube de palabras y el mapa
+            if (chart.id === "chart10") {
+              width = 350; // Ancho reducido para la nube de palabras
+              height = 180; // Alto reducido para la nube de palabras
+            } else if (chart.id === "chart12") {
+              width = 380; // Ancho reducido para el mapa
+              height = 150; // Alto reducido para el mapa
+            }
+            
+            pdf.addImage(imgData, "PNG", 10, 10, width, height);
             pdf.addPage();
             document.body.removeChild(tempContainer); // Eliminar el contenedor temporal después de usarlo
             downloadNextChart(index + 1);
