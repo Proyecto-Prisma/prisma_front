@@ -1,9 +1,10 @@
 import React, { useRef, useState } from "react";
 import axios from "axios";
 import Button from "@mui/material/Button";
+import { CircularProgress } from "@mui/material";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useAuth } from "../../AuthContext"; // Ensure the path is correct
+import { useAuth } from "../../AuthContext"; // Adjust path as needed
 
 const FileUpload = ({ searchString, inicio, fin }) => {
   const { authData } = useAuth(); // Get auth data from context
@@ -12,8 +13,8 @@ const FileUpload = ({ searchString, inicio, fin }) => {
   const darkPink = "#C0005E";
   const [scopusFile, setScopusFile] = useState(null);
   const [wosFile, setWosFile] = useState(null);
-  const [dataProcessed, setDataProcessed] = useState(false); // State to track if the data is ready for export
-  const [drag, setDrag] = useState(false);
+  const [dataProcessed, setDataProcessed] = useState(false);
+  const [loading, setLoading] = useState(false); // State to track loading
   const scopusInputRef = useRef(null);
   const wosInputRef = useRef(null);
 
@@ -26,39 +27,6 @@ const FileUpload = ({ searchString, inicio, fin }) => {
     }
   };
 
-  const handleDragEnter = (e) => {
-    e.preventDefault();
-    setDrag(true);
-  };
-
-  const handleDragLeave = (e) => {
-    e.preventDefault();
-    setDrag(false);
-  };
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
-  };
-
-  const handleDrop = (e, fileType) => {
-    e.preventDefault();
-    setDrag(false);
-    const file = e.dataTransfer.files[0];
-    if (fileType === "scopus") {
-      setScopusFile(file);
-    } else if (fileType === "wos") {
-      setWosFile(file);
-    }
-  };
-
-  const handleDivClick = (fileType) => {
-    if (fileType === "scopus") {
-      scopusInputRef.current.click();
-    } else if (fileType === "wos") {
-      wosInputRef.current.click();
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -66,6 +34,8 @@ const FileUpload = ({ searchString, inicio, fin }) => {
       toast.error("Se requieren la cadena de búsqueda y ambos archivos.");
       return;
     }
+
+    setLoading(true); // Start loading
 
     const formData = new FormData();
     formData.append("scopus_file", scopusFile);
@@ -86,26 +56,25 @@ const FileUpload = ({ searchString, inicio, fin }) => {
         }
       );
 
-      // Check if the response has the 'upload_key'
       if (response.data && response.data.upload_key) {
-        // Save the upload key in localStorage
         localStorage.setItem("upload_key", response.data.upload_key);
         console.log("Upload key saved:", response.data.upload_key);
+        await axios.get(
+          "https://flask-fire-qwreg2y2oq-uc.a.run.app/data/process"
+        );
+        setDataProcessed(true); // Enable the Export Data button
+        toast.success("Archivos procesados con éxito. Listo para exportar.");
       } else {
         console.log("Upload key not found in the response");
       }
-
-      // After successful upload, call the /process endpoint
-      await axios.get("https://flask-fire-qwreg2y2oq-uc.a.run.app/data/process");
-      setDataProcessed(true); // Enable the Export Data button
-      toast.success("Archivos procesados con éxito. Listo para exportar.");
     } catch (error) {
-      setDataProcessed(false); // Disable the Export Data button if there's an error
-
+      setDataProcessed(false);
       toast.error(
         error.response?.data?.error ||
           "Ocurrió un error durante la carga o el procesamiento."
       );
+    } finally {
+      setLoading(false); // End loading
     }
   };
 
@@ -141,16 +110,22 @@ const FileUpload = ({ searchString, inicio, fin }) => {
     <div>
       <form onSubmit={handleSubmit}>
         <div
-          onClick={() => handleDivClick("scopus")}
-          onDragEnter={handleDragEnter}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={(e) => handleDrop(e, "scopus")}
+          onClick={() =>
+            scopusInputRef.current && scopusInputRef.current.click()
+          }
+          onDragEnter={(e) => e.preventDefault()}
+          onDragOver={(e) => e.preventDefault()}
+          onDragLeave={(e) => e.preventDefault()}
+          onDrop={(e) => {
+            e.preventDefault();
+            setScopusFile(e.dataTransfer.files[0]);
+          }}
           style={{
             marginBottom: "20px",
             padding: "20px",
-            border: drag ? "2px solid blue" : "2px dashed gray",
+            border: "2px dashed gray",
             cursor: "pointer",
+            textAlign: "center",
           }}
         >
           <p>
@@ -167,16 +142,20 @@ const FileUpload = ({ searchString, inicio, fin }) => {
           />
         </div>
         <div
-          onClick={() => handleDivClick("wos")}
-          onDragEnter={handleDragEnter}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={(e) => handleDrop(e, "wos")}
+          onClick={() => wosInputRef.current && wosInputRef.current.click()}
+          onDragEnter={(e) => e.preventDefault()}
+          onDragOver={(e) => e.preventDefault()}
+          onDragLeave={(e) => e.preventDefault()}
+          onDrop={(e) => {
+            e.preventDefault();
+            setWosFile(e.dataTransfer.files[0]);
+          }}
           style={{
             marginBottom: "20px",
             padding: "20px",
-            border: drag ? "2px solid blue" : "2px dashed gray",
+            border: "2px dashed gray",
             cursor: "pointer",
+            textAlign: "center",
           }}
         >
           <p>
@@ -212,28 +191,40 @@ const FileUpload = ({ searchString, inicio, fin }) => {
         </div>
       </form>
 
-      {dataProcessed && (
-        <div style={{ marginTop: "1rem", textAlign: "center" }}>
-          <Button
-            onClick={handleExport}
-            variant="contained"
-            size="large"
-            sx={{
-              backgroundColor: "transparent",
-              color: pink,
-              border: `2px solid ${pink}`,
-              fontWeight: "bold",
-              textTransform: "none",
-              padding: "0.5rem 4rem",
-              ":hover": {
-                backgroundColor: pink,
-                color: "white",
-              },
-            }}
-          >
-            Exportar Datos
-          </Button>
+      {loading ? (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            marginTop: "20px",
+          }}
+        >
+          <CircularProgress />
         </div>
+      ) : (
+        dataProcessed && (
+          <div style={{ marginTop: "1rem", textAlign: "center" }}>
+            <Button
+              onClick={handleExport}
+              variant="contained"
+              size="large"
+              sx={{
+                backgroundColor: "transparent",
+                color: pink,
+                border: `2px solid ${pink}`,
+                fontWeight: "bold",
+                textTransform: "none",
+                padding: "0.5rem 4rem",
+                ":hover": {
+                  backgroundColor: pink,
+                  color: "white",
+                },
+              }}
+            >
+              Exportar Datos
+            </Button>
+          </div>
+        )
       )}
 
       <ToastContainer />
