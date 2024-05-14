@@ -1101,7 +1101,210 @@ const Graphs = () => {
             </Button>
           </Box>
         </Grid>
+
+
+        
       </Grid>
+
+      <Typography variant="h4" mt={4} mb={2} sx={{ fontWeight: 600 }}>
+        Authors
+      </Typography>
+      <Grid container spacing={3} justifyContent={"center"}>
+        
+      <Grid item xs={12} sm={12} md={9}>
+          <Paper
+            elevation={3}
+            style={{ borderRadius: "1rem", padding: "4rem" }}
+            id="chart14"
+            className="graph-container"
+          >
+            <Typography
+              variant="h6"
+              gutterBottom
+              style={{ fontWeight: "bold" }}
+            >
+              Authors Histogram Chart
+            </Typography>
+            <BarChart
+              width={900}
+              height={500}
+              data={chartData.authors}
+              margin={{
+                top: 50,
+                bottom: 50, // Aumentado para proporcionar más espacio
+              }}
+            >
+              <Bar dataKey="frequency">
+                {chartData.authors.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={generateRandomColor()} />
+                ))}
+                <LabelList
+                  dataKey="frequency"
+                  position="top"
+                  fontWeight="bold"
+                  
+                />
+              </Bar>
+              <XAxis
+                dataKey="author"
+                angle={-45}
+                textAnchor="end"
+                interval={0}
+                height={120}
+              />
+              <YAxis />
+              <Tooltip />
+            </BarChart>
+          </Paper>
+          <Box mt={3} textAlign={"end"}>
+            <Button
+              variant="outlined"
+              onClick={() => downloadChartAsPNG("chart14")}
+              sx={{
+                color: "#FF005B",
+                borderColor: "#FF005B",
+                textTransform: "none",
+                fontWeight: "bold",
+                ":hover": {
+                  color: "white",
+                  backgroundColor: "#FF005B",
+                  borderColor: "#FF005B",
+                },
+              }}
+            >
+              Descargar gráfica de barras
+            </Button>
+          </Box>
+        </Grid>
+
+        <Grid item xs={12} sm={12} md={9}>
+          <Paper
+            elevation={3}
+            style={{ borderRadius: "1rem", padding: "4rem" }}
+            id="chart15"
+            className="graph-container"
+          >
+            <Typography
+              variant="h6"
+              gutterBottom
+              style={{ fontWeight: "bold" }}
+            >
+              Authors Radar Chart
+            </Typography>
+            <RadarChart
+              width={900}
+              height={500}
+              margin={{
+                top: 10,
+                bottom: 50, // Aumentado para proporcionar más espacio
+              }}
+              data={chartData.authors}
+            >
+              <PolarGrid />
+              <PolarAngleAxis dataKey="author" />
+              <Radar
+                dataKey="frequency"
+                stroke="#F06292"
+                fill="#F06292"
+                fillOpacity={0.6}
+                label={{
+                  position: "inside",
+                  offset: 5,
+                  fontWeight: "bold",
+                }}
+              />
+              <Tooltip />
+            </RadarChart>
+          </Paper>
+          <Box mt={3} textAlign={"end"}>
+            <Button
+              variant="outlined"
+              onClick={() => downloadChartAsPNG("chart15")}
+              sx={{
+                color: "#FF005B",
+                borderColor: "#FF005B",
+                textTransform: "none",
+                fontWeight: "bold",
+                ":hover": {
+                  color: "white",
+                  backgroundColor: "#FF005B",
+                  borderColor: "#FF005B",
+                },
+              }}
+            >
+              Descargar gráfica de radar
+            </Button>
+          </Box>
+        </Grid>
+
+        <Grid item xs={12} sm={12} md={9}>
+          <Paper
+            elevation={3}
+            style={{ borderRadius: "1rem", padding: "4rem" }}
+            id="chart16"
+            className="graph-container"
+          >
+            <Typography
+              variant="h6"
+              gutterBottom
+              style={{ fontWeight: "bold" }}
+            >
+              Authors Pie Chart
+            </Typography>
+            <PieChart
+              width={900}
+              height={500}
+              margin={{
+                top: 10,
+                bottom: 50,
+              }}
+            >
+              <Pie
+                data={chartData.authors}
+                height={500}
+                width={500}
+                dataKey="frequency"
+                nameKey="author"
+                cx="50%"
+                cy="50%"
+                outerRadius={80}
+                label={{ fontWeight: "bold" }}
+              >
+                {chartData.authors.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={generateRandomColor()} />
+                ))}
+              </Pie>
+              <Tooltip />
+              <Legend wrapperStyle={{ bottom: "-15px" }} />
+            </PieChart>
+          </Paper>
+          <Box mt={3} textAlign={"end"}>
+            <Button
+              variant="outlined"
+              onClick={() => downloadChartAsPNG("chart16")}
+              sx={{
+                color: "#FF005B",
+                borderColor: "#FF005B",
+                textTransform: "none",
+                fontWeight: "bold",
+                ":hover": {
+                  color: "white",
+                  backgroundColor: "#FF005B",
+                  borderColor: "#FF005B",
+                },
+              }}
+            >
+              Descargar gráfica de pie
+            </Button>
+          </Box>
+        </Grid>
+      
+
+
+        
+      </Grid>
+
+      
     </Box>
   );
 };
