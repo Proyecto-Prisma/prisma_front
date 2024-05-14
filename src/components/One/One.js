@@ -127,11 +127,19 @@ const One = () => {
   const team = [
     {
       name: "Dr. Ledo",
-      role: "Administrador de Proyecto",
+      role: "Profesor",
+    },
+    {
+      name: "Dr. Edgar",
+      role: "Profesor",
+    },
+    {
+      name: "Mtro. Yuseff",
+      role: "Profesor",
     },
     {
       name: "Salomón Martínez",
-      role: "Desarrolador Frontend",
+      role: "Desarrollador Frontend",
     },
     {
       name: "Arturo Alfaro",
@@ -535,7 +543,7 @@ const One = () => {
           </Typography>
           <Grid container spacing={2} justifyContent="center">
             {team.map((member, index) => (
-              <Grid item xs={12} sm={6} md={4} lg={2} key={index}>
+              <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
                 <Box textAlign="center">
                   <Avatar
                     sx={{
